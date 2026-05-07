@@ -43,12 +43,13 @@ class SettingsScreen extends StatelessWidget {
                     }
 
                     return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                       children: [
                         _ProfileCard(
                           localizations: localizations,
                           fullName: profile.fullName,
                           skills: profile.skills,
+                          onEditTap: () => context.push(AppRoutes.editProfile),
                         ),
                         const SizedBox(height: 20),
                         Padding(
@@ -67,6 +68,12 @@ class SettingsScreen extends StatelessWidget {
                         _SettingsMenu(
                           localizations: localizations,
                           menuItemKeys: profile.menuItemKeys,
+                          onAccountTap: () =>
+                              context.push(AppRoutes.accountSettings),
+                          onPaymentTap: () =>
+                              context.push(AppRoutes.paymentHistory),
+                          onSupportTap: () =>
+                              context.push(AppRoutes.supportCenter),
                         ),
                         const SizedBox(height: 18),
                         _SignOutButton(localizations: localizations),
@@ -77,9 +84,6 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        bottomNavigationBar: _ProfileBottomNavigation(
-          localizations: localizations,
         ),
       ),
     );
@@ -94,7 +98,7 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 64,
+      height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: const BoxDecoration(color: Colors.white),
       child: Row(
@@ -139,19 +143,21 @@ class _ProfileCard extends StatelessWidget {
     required this.localizations,
     required this.fullName,
     required this.skills,
+    required this.onEditTap,
   });
 
   final AppLocalizations localizations;
   final String fullName;
   final List<String> skills;
+  final VoidCallback onEditTap;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
             color: Color(0x08000000),
@@ -166,25 +172,32 @@ class _ProfileCard extends StatelessWidget {
           Positioned(
             right: 26,
             top: 0,
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE7EEF0)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x0D000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
+            child: Material(
+              color: Colors.white,
+              shape: const CircleBorder(),
+              child: InkWell(
+                onTap: onEditTap,
+                customBorder: const CircleBorder(),
+                child: Ink(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFE7EEF0)),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x0D000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.edit_outlined,
-                color: Color(0xFF9AA7AD),
-                size: 20,
+                  child: const Icon(
+                    Icons.edit_outlined,
+                    color: Color(0xFF9AA7AD),
+                    size: 20,
+                  ),
+                ),
               ),
             ),
           ),
@@ -311,17 +324,23 @@ class _SettingsMenu extends StatelessWidget {
   const _SettingsMenu({
     required this.localizations,
     required this.menuItemKeys,
+    required this.onAccountTap,
+    required this.onPaymentTap,
+    required this.onSupportTap,
   });
 
   final AppLocalizations localizations;
   final List<String> menuItemKeys;
+  final VoidCallback onAccountTap;
+  final VoidCallback onPaymentTap;
+  final VoidCallback onSupportTap;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
             color: Color(0x08000000),
@@ -335,16 +354,19 @@ class _SettingsMenu extends StatelessWidget {
           _SettingsTile(
             icon: Icons.settings_outlined,
             title: localizations.text(menuItemKeys[0]),
+            onTap: onAccountTap,
           ),
           const Divider(height: 1, color: Color(0xFFF0F3F4)),
           _SettingsTile(
             icon: Icons.payments_outlined,
             title: localizations.text(menuItemKeys[1]),
+            onTap: onPaymentTap,
           ),
           const Divider(height: 1, color: Color(0xFFF0F3F4)),
           _SettingsTile(
             icon: Icons.support_agent_outlined,
             title: localizations.text(menuItemKeys[2]),
+            onTap: onSupportTap,
           ),
         ],
       ),
@@ -353,15 +375,20 @@ class _SettingsMenu extends StatelessWidget {
 }
 
 class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({required this.icon, required this.title});
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String title;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      minVerticalPadding: 12,
+      minVerticalPadding: 10,
       leading: Container(
         width: 34,
         height: 34,
@@ -383,7 +410,7 @@ class _SettingsTile extends StatelessWidget {
         color: Color(0xFFD0D8DC),
         size: 24,
       ),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
@@ -409,122 +436,6 @@ class _SignOutButton extends StatelessWidget {
       ),
       icon: const Icon(Icons.logout, size: 22),
       label: Text(localizations.text('signOut')),
-    );
-  }
-}
-
-class _ProfileBottomNavigation extends StatelessWidget {
-  const _ProfileBottomNavigation({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, -3),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _BottomNavItem(
-                icon: Icons.home_work_outlined,
-                label: localizations.text('homeTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.home),
-              ),
-              _BottomNavItem(
-                icon: Icons.handyman_outlined,
-                label: localizations.text('ordersTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.jobs),
-              ),
-              _BottomNavItem(
-                icon: Icons.map_outlined,
-                label: localizations.text('mapTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.map),
-              ),
-              _BottomNavItem(
-                icon: Icons.person_outline,
-                label: localizations.text('profileTab'),
-                selected: true,
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected
-        ? SettingsScreen._brandColor
-        : const Color(0xFF9AA7AD);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: color, size: 25),
-                const SizedBox(height: 3),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-            if (selected)
-              const Positioned(
-                right: 4,
-                top: -4,
-                child: CircleAvatar(
-                  radius: 4,
-                  backgroundColor: SettingsScreen._brandColor,
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../app/localization/app_localizations.dart';
-import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../application/map_cubit.dart';
 import '../../data/local_map_repository.dart';
@@ -14,6 +12,7 @@ class MapScreen extends StatelessWidget {
   const MapScreen({super.key});
 
   static const _brandColor = Color(0xFF087D83);
+  static const _buttonColor = Color(0xFF63C6CB);
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +25,27 @@ class MapScreen extends StatelessWidget {
           children: [
             Positioned.fill(child: _ServiceMap(localizations: localizations)),
             SafeArea(
-              child: Column(
-                children: [
-                  _MapHeader(localizations: localizations),
-                  const Spacer(),
-                ],
+              bottom: false,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  height: 44,
+                  margin: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
+            // SafeArea(
+            //   child: Column(
+            //     children: [
+            //       _MapHeader(localizations: localizations),
+            //       const Spacer(),
+            //     ],
+            //   ),
+            // ),
             const Positioned(
               right: 18,
               top: 124,
@@ -51,7 +64,7 @@ class MapScreen extends StatelessWidget {
             ),
           ],
         ),
-        bottomNavigationBar: _MapBottomNavigation(localizations: localizations),
+        //   bottomNavigationBar: _MapBottomNavigation(localizations: localizations),
       ),
     );
   }
@@ -90,7 +103,7 @@ class _ServiceMap extends StatelessWidget {
           children: [
             TileLayer(
               urlTemplate:
-                  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
               subdomains: const ['a', 'b', 'c', 'd'],
               userAgentPackageName: 'com.ustahyzmaty.master_service',
             ),
@@ -140,56 +153,6 @@ class _ServiceMap extends StatelessWidget {
   }
 }
 
-class _MapHeader extends StatelessWidget {
-  const _MapHeader({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x10000000),
-            blurRadius: 12,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.location_on_outlined,
-            color: MapScreen._brandColor,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              localizations.text('appTitle'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: MapScreen._brandColor,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          Text(
-            'RU/TM',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: MapScreen._brandColor,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _MapControl extends StatelessWidget {
   const _MapControl({required this.icon});
 
@@ -198,11 +161,11 @@ class _MapControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 50,
-      height: 50,
+      width: 46,
+      height: 46,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: const [
           BoxShadow(
             color: Color(0x18000000),
@@ -211,7 +174,7 @@ class _MapControl extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(icon, color: const Color(0xFF2E3B40), size: 24),
+      child: Icon(icon, color: const Color(0xFF2E3B40), size: 21),
     );
   }
 }
@@ -329,13 +292,13 @@ class _RequestSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        color: Colors.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x20000000),
+            color: Color(0x14000000),
             blurRadius: 24,
             offset: Offset(0, -4),
           ),
@@ -447,7 +410,7 @@ class _RequestSheet extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: () {},
                   style: FilledButton.styleFrom(
-                    backgroundColor: MapScreen._brandColor,
+                    backgroundColor: MapScreen._buttonColor,
                     foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
@@ -468,101 +431,17 @@ class _RequestSheet extends StatelessWidget {
   }
 }
 
-class _MapBottomNavigation extends StatelessWidget {
-  const _MapBottomNavigation({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, -3),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _BottomNavItem(
-                icon: Icons.home_work_outlined,
-                label: localizations.text('homeTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.home),
-              ),
-              _BottomNavItem(
-                icon: Icons.handyman_outlined,
-                label: localizations.text('ordersTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.jobs),
-              ),
-              _BottomNavItem(
-                icon: Icons.map_outlined,
-                label: localizations.text('mapTab'),
-                selected: true,
-                onTap: () {},
-              ),
-              _BottomNavItem(
-                icon: Icons.person_outline,
-                label: localizations.text('profileTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.settings),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? MapScreen._brandColor : const Color(0xFF9AA7AD);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 25),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// class _MapBottomNavigation extends StatelessWidget {
+//   const _MapBottomNavigation({required this.localizations});
+//
+//   final AppLocalizations localizations;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return AppBottomNavBar(
+//       localizations: localizations,
+//       selectedTab: AppBottomTab.map,
+//       backgroundColor: Colors.white.withValues(alpha: 0.86),
+//     );
+//   }
+// }

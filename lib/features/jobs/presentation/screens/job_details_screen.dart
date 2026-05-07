@@ -9,6 +9,7 @@ import '../../application/job_details_cubit.dart';
 import '../../data/local_jobs_repository.dart';
 
 const _brandColor = Color(0xFF087D83);
+const _buttonColor = Color(0xFF63C6CB);
 
 class JobDetailsScreen extends StatelessWidget {
   const JobDetailsScreen({super.key});
@@ -43,7 +44,7 @@ class JobDetailsScreen extends StatelessWidget {
                     }
 
                     return ListView(
-                      padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                       children: [
                         _PhotoSection(
                           title: localizations.text('before'),
@@ -79,7 +80,7 @@ class JobDetailsScreen extends StatelessWidget {
                         FilledButton.icon(
                           onPressed: () {},
                           style: FilledButton.styleFrom(
-                            backgroundColor: _brandColor,
+                            backgroundColor: _buttonColor,
                             foregroundColor: Colors.white,
                             minimumSize: const Size.fromHeight(50),
                             shape: RoundedRectangleBorder(
@@ -99,9 +100,6 @@ class JobDetailsScreen extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: _DetailsBottomNavigation(
-          localizations: localizations,
-        ),
       ),
     );
   }
@@ -115,7 +113,7 @@ class _DetailsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
+      height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -150,7 +148,7 @@ class _DetailsHeader extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: const Color(0xFFF4F8F9),
               borderRadius: BorderRadius.circular(18),
@@ -376,7 +374,7 @@ class _PriceConfirmationCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: const Color(0xFFE3F3F3),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFB5D9DA)),
       ),
       child: Column(
@@ -416,7 +414,7 @@ class _PriceConfirmationCard extends StatelessWidget {
           FilledButton.icon(
             onPressed: () {},
             style: FilledButton.styleFrom(
-              backgroundColor: _brandColor,
+              backgroundColor: _buttonColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -450,105 +448,6 @@ class _CompletionNote extends StatelessWidget {
         height: 1.55,
         fontStyle: FontStyle.italic,
         fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-}
-
-class _DetailsBottomNavigation extends StatelessWidget {
-  const _DetailsBottomNavigation({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, -3),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _BottomNavItem(
-                icon: Icons.home_work_outlined,
-                label: localizations.text('homeTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.home),
-              ),
-              _BottomNavItem(
-                icon: Icons.handyman_outlined,
-                label: localizations.text('ordersTab'),
-                selected: true,
-                onTap: () => context.go(AppRoutes.jobs),
-              ),
-              _BottomNavItem(
-                icon: Icons.map_outlined,
-                label: localizations.text('mapTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.map),
-              ),
-              _BottomNavItem(
-                icon: Icons.person_outline,
-                label: localizations.text('profileTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.settings),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? _brandColor : const Color(0xFF9AA7AD);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

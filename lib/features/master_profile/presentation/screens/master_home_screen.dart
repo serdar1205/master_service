@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
+import 'dart:ui';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
@@ -11,7 +14,8 @@ import '../../data/local_home_repository.dart';
 class MasterHomeScreen extends StatelessWidget {
   const MasterHomeScreen({super.key});
 
-  static const _brandColor = Color(0xFF087D83);
+  static const _brandColor = Color(0xFF4C9397);
+  static const _buttonColor = Color(0xFF63C6CB);
 
   @override
   Widget build(BuildContext context) {
@@ -21,117 +25,98 @@ class MasterHomeScreen extends StatelessWidget {
       create: (_) => HomeCubit(const LocalHomeRepository())..load(),
       child: Scaffold(
         backgroundColor: const Color(0xFFF4FBFB),
-        body: SafeArea(
-          child: Column(
-            children: [
-              _HomeHeader(localizations: localizations),
-              Expanded(
-                child: BlocBuilder<HomeCubit, HomeState>(
-                  builder: (context, state) {
-                    if (state.status == AppStatus.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+        body: BlocBuilder<HomeCubit, HomeState>(
+          builder: (context, state) {
+            if (state.status == AppStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                    if (state.status == AppStatus.failure) {
-                      return Center(child: Text(state.errorMessage ?? ''));
-                    }
+            if (state.status == AppStatus.failure) {
+              return Center(child: Text(state.errorMessage ?? ''));
+            }
 
-                    final data = state.data;
-                    if (data == null) {
-                      return const SizedBox.shrink();
-                    }
+            final data = state.data;
+            if (data == null) {
+              return const SizedBox.shrink();
+            }
 
-                    return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
-                      children: [
-                        _Greeting(localizations: localizations),
-                        const SizedBox(height: 18),
-                        _StatsRow(
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  shadowColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  forceMaterialTransparency: true,
+                  expandedHeight: 132,
+                  toolbarHeight: 58,
+                  automaticallyImplyLeading: false,
+                  titleSpacing: 0,
+                  // Paint the image as the AppBar's own background so it shows when collapsed
+                  backgroundColor: Colors.transparent,
+                  title: const SizedBox.shrink(),
+                  flexibleSpace: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Always-visible image — covers both collapsed and expanded states
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/image/header.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      // Animated overlay on top
+                      FlexibleSpaceBar(
+                        collapseMode: CollapseMode.parallax,
+                        background: _AnimatedHomeHeader(
                           localizations: localizations,
-                          activeCount: data.stats[0].value,
-                          completedCount: data.stats[1].value,
-                          earningsCount: data.stats[2].value,
                         ),
-                        const SizedBox(height: 22),
-                        _SectionHeader(
-                          title: localizations.text('currentJob'),
-                          trailing: _StatusChip(
-                            label: localizations.text('started'),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _CurrentJobCard(localizations: localizations),
-                        const SizedBox(height: 24),
-                        _SectionHeader(
-                          title: localizations.text('newOrders'),
-                          trailing: TextButton(
-                            onPressed: () => context.go(AppRoutes.jobs),
-                            child: Text(localizations.text('seeAll')),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        _NewOrderCard(localizations: localizations),
-                      ],
-                    );
-                  },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _Greeting(localizations: localizations),
+                      const SizedBox(height: 18),
+                      _StatsRow(
+                        localizations: localizations,
+                        activeCount: data.stats[0].value,
+                        completedCount: data.stats[1].value,
+                        earningsCount: data.stats[2].value,
+                      ),
+                      const SizedBox(height: 20),
+                      _SectionHeader(
+                        title: localizations.text('currentJob'),
+                        trailing: _StatusChip(
+                          label: localizations.text('started'),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _CurrentJobCard(localizations: localizations),
+                      const SizedBox(height: 20),
+                      _SectionHeader(
+                        title: localizations.text('newOrders'),
+                        trailing: TextButton(
+                          onPressed: () => context.go(AppRoutes.jobs),
+                          child: Text(localizations.text('seeAll')),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _NewOrderCard(localizations: localizations),
+                    ]),
+                  ),
+                ),
+                SliverToBoxAdapter(child: SizedBox(height: 160)),
+              ],
+            );
+          },
         ),
-        bottomNavigationBar: _HomeBottomNavigation(
-          localizations: localizations,
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 58,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.location_on_outlined,
-            color: MasterHomeScreen._brandColor,
-            size: 24,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              localizations.text('appTitle'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: MasterHomeScreen._brandColor,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          Text(
-            'RU/TM',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: const Color(0xFF4E5B61),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -177,6 +162,90 @@ class _Greeting extends StatelessWidget {
           child: Icon(Icons.person, color: Color(0xFF3B70D8), size: 34),
         ),
       ],
+    );
+  }
+}
+
+class _AnimatedHomeHeader extends StatelessWidget {
+  const _AnimatedHomeHeader({required this.localizations});
+
+  final AppLocalizations localizations;
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const minHeight = 58.0;
+        const maxHeight = 132.0;
+        final current = constraints.maxHeight - topInset;
+        final rawT = ((current - minHeight) / (maxHeight - minHeight)).clamp(
+          0.0,
+          1.0,
+        );
+        final t = Curves.easeOutCubic.transform(rawT);
+
+        final bottomScrim = lerpDouble(0.42, 0.18, t)!;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Expanded state image
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/image/header.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            // Gradient overlay
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: lerpDouble(0.10, 0.04, t)!),
+                    Colors.black.withValues(alpha: bottomScrim),
+                  ],
+                ),
+              ),
+            ),
+            // Blur effect on toolbar area
+            Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                height: kToolbarHeight + topInset,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: lerpDouble(10, 3, t)!,
+                      sigmaY: lerpDouble(10, 3, t)!,
+                    ),
+                    child: ColoredBox(
+                      color: Colors.white.withValues(
+                        alpha: lerpDouble(0.22, 0.10, t)!,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Bottom divider line
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 1,
+                color: Colors.white.withValues(
+                  alpha: lerpDouble(0.24, 0.0, t)!,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -255,11 +324,11 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 94,
+      constraints: const BoxConstraints(minHeight: 88),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(13),
+        borderRadius: BorderRadius.circular(11),
         border: Border.all(color: borderColor),
         boxShadow: const [
           BoxShadow(
@@ -272,8 +341,8 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: foregroundColor.withValues(alpha: 0.9), size: 24),
-          const Spacer(),
+          Icon(icon, color: foregroundColor.withValues(alpha: 0.9), size: 22),
+          const SizedBox(height: 10),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -281,7 +350,7 @@ class _StatCard extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -358,7 +427,7 @@ class _CurrentJobCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFD7E0E3)),
         boxShadow: const [
           BoxShadow(
@@ -435,7 +504,7 @@ class _CurrentJobCard extends StatelessWidget {
                         onPressed: () =>
                             context.go(AppRoutes.jobDetailsPath('job-2')),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: MasterHomeScreen._brandColor,
+                          backgroundColor: MasterHomeScreen._buttonColor,
                           foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(
@@ -478,77 +547,96 @@ class _MapPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 144,
-      decoration: const BoxDecoration(
-        color: Color(0xFF55999A),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      ),
-      child: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _MapPatternPainter())),
-          const Positioned(
-            left: 99,
-            top: 72,
-            child: _MapPin(
-              icon: Icons.handyman_outlined,
-              backgroundColor: Colors.white,
-              iconColor: MasterHomeScreen._brandColor,
-            ),
-          ),
-          Positioned(
-            right: 71,
-            top: 30,
-            child: Column(
-              children: [
-                const _MapPin(
-                  icon: Icons.person_outline,
-                  backgroundColor: MasterHomeScreen._brandColor,
-                  iconColor: Colors.white,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: FlutterMap(
+                  options: const MapOptions(
+                    initialCenter: LatLng(37.938, 58.385),
+                    initialZoom: 13.2,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                      subdomains: ['a', 'b', 'c', 'd'],
+                      userAgentPackageName: 'com.ustahyzmaty.master_service',
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 7,
+              ),
+            ),
+            Positioned.fill(
+              child: ColoredBox(color: Colors.black.withValues(alpha: 0.06)),
+            ),
+            const Positioned(
+              left: 99,
+              top: 72,
+              child: _MapPin(
+                icon: Icons.handyman_outlined,
+                backgroundColor: Colors.white,
+                iconColor: MasterHomeScreen._brandColor,
+              ),
+            ),
+            Positioned(
+              right: 71,
+              top: 30,
+              child: Column(
+                children: [
+                  const _MapPin(
+                    icon: Icons.person_outline,
+                    backgroundColor: MasterHomeScreen._brandColor,
+                    iconColor: Colors.white,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(
-                    localizations.text('customer'),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: const Color(0xFF101719),
-                      fontWeight: FontWeight.w800,
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      localizations.text('customer'),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: const Color(0xFF101719),
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 18,
-            bottom: 14,
-            child: FilledButton.icon(
-              onPressed: () {},
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF101719),
-                elevation: 3,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              icon: const Icon(Icons.map_outlined, size: 20),
-              label: Text(
-                localizations.text('openMap'),
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                ],
               ),
             ),
-          ),
-        ],
+            Positioned(
+              right: 18,
+              bottom: 14,
+              child: FilledButton.icon(
+                onPressed: () {},
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF101719),
+                  elevation: 3,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                icon: const Icon(Icons.map_outlined, size: 20),
+                label: Text(
+                  localizations.text('openMap'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -573,47 +661,6 @@ class _MapPin extends StatelessWidget {
       child: Icon(icon, color: iconColor, size: 18),
     );
   }
-}
-
-class _MapPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-    final pointPaint = Paint()..color = const Color(0xFFDD6568);
-
-    for (var i = 0; i < 5; i++) {
-      final y = size.height * (0.18 + i * 0.16);
-      final path = Path()
-        ..moveTo(0, y)
-        ..cubicTo(
-          size.width * 0.22,
-          y - 34,
-          size.width * 0.48,
-          y + 28,
-          size.width,
-          y - 18,
-        );
-      canvas.drawPath(path, linePaint);
-    }
-
-    const points = [
-      Offset(166, 31),
-      Offset(191, 23),
-      Offset(214, 70),
-      Offset(148, 83),
-      Offset(117, 53),
-    ];
-
-    for (final point in points) {
-      canvas.drawCircle(point, 3.2, pointPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_MapPatternPainter oldDelegate) => false;
 }
 
 class _CategoryPill extends StatelessWidget {
@@ -769,7 +816,7 @@ class _NewOrderCard extends StatelessWidget {
               FilledButton(
                 onPressed: () {},
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF09B2BE),
+                  backgroundColor: const Color(0xFF63D5DA),
                   foregroundColor: const Color(0xFF083237),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(9),
@@ -787,108 +834,6 @@ class _NewOrderCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HomeBottomNavigation extends StatelessWidget {
-  const _HomeBottomNavigation({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, -3),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _BottomNavItem(
-                icon: Icons.home_work_outlined,
-                label: localizations.text('homeTab'),
-                selected: true,
-                onTap: () {},
-              ),
-              _BottomNavItem(
-                icon: Icons.handyman_outlined,
-                label: localizations.text('ordersTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.jobs),
-              ),
-              _BottomNavItem(
-                icon: Icons.map_outlined,
-                label: localizations.text('mapTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.map),
-              ),
-              _BottomNavItem(
-                icon: Icons.person_outline,
-                label: localizations.text('profileTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.settings),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected
-        ? MasterHomeScreen._brandColor
-        : const Color(0xFF9AA7AD);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 25),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

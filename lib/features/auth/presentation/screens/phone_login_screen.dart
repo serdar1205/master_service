@@ -224,10 +224,10 @@ class _LoginCard extends StatelessWidget {
             ElevatedButton(
               onPressed: state.isLoading ? null : onSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: brandColor,
+                backgroundColor: const Color(0xFF63C6CB),
                 foregroundColor: Colors.white,
                 elevation: 8,
-                shadowColor: brandColor.withValues(alpha: 0.22),
+                shadowColor: const Color(0xFF63C6CB).withValues(alpha: 0.18),
                 minimumSize: const Size.fromHeight(54),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),

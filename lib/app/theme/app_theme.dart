@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   const AppTheme._();
 
-  static const _seedColor = Color(0xFF087D83);
+  static const _seedColor = Color(0xFF5CC2C8);
 
   static ThemeData get light {
     final colorScheme = ColorScheme.fromSeed(
@@ -36,7 +36,7 @@ class AppTheme {
         elevation: 0,
         color: colorScheme.surface,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
@@ -45,9 +45,20 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(48),
+          backgroundColor: const Color(0xFF63C6CB),
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(46),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFF63C6CB),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
       ),

@@ -12,6 +12,7 @@ class JobsScreen extends StatelessWidget {
   const JobsScreen({super.key});
 
   static const _brandColor = Color(0xFF087D83);
+  static const _buttonColor = Color(0xFF63C6CB);
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class JobsScreen extends StatelessWidget {
                     }
 
                     return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                       children: [
                         Text(
                           localizations.text('myJobsTitle'),
@@ -66,13 +67,13 @@ class JobsScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         _StatsRow(
                           localizations: localizations,
                           activeCount: data.activeCount.toString(),
                           completedCount: data.completedCount.toString(),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         for (var i = 0; i < data.activeJobs.length; i++) ...[
                           _OrderCard(
                             category: data.activeJobs[i].category,
@@ -106,7 +107,7 @@ class JobsScreen extends StatelessWidget {
                             onSecondaryAction: () {},
                           ),
                           if (i != data.activeJobs.length - 1)
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 14),
                         ],
                         const SizedBox(height: 24),
                         Text(
@@ -136,9 +137,6 @@ class JobsScreen extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: _OrdersBottomNavigation(
-          localizations: localizations,
-        ),
       ),
     );
   }
@@ -152,7 +150,7 @@ class _OrdersHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 58,
+      height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -255,11 +253,11 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 90,
+      height: 88,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: borderColor),
       ),
       child: Column(
@@ -329,7 +327,7 @@ class _OrderCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFDCE5E7)),
         boxShadow: const [
           BoxShadow(
@@ -413,7 +411,7 @@ class _OrderCard extends StatelessWidget {
                           : FilledButton(
                               onPressed: onPrimaryAction,
                               style: FilledButton.styleFrom(
-                                backgroundColor: JobsScreen._brandColor,
+                                backgroundColor: JobsScreen._buttonColor,
                                 foregroundColor: Colors.white,
                                 minimumSize: const Size.fromHeight(43),
                                 shape: RoundedRectangleBorder(
@@ -730,105 +728,6 @@ class _HistoryCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _OrdersBottomNavigation extends StatelessWidget {
-  const _OrdersBottomNavigation({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, -3),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _BottomNavItem(
-                icon: Icons.home_work_outlined,
-                label: localizations.text('homeTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.home),
-              ),
-              _BottomNavItem(
-                icon: Icons.handyman_outlined,
-                label: localizations.text('ordersTab'),
-                selected: true,
-                onTap: () {},
-              ),
-              _BottomNavItem(
-                icon: Icons.map_outlined,
-                label: localizations.text('mapTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.map),
-              ),
-              _BottomNavItem(
-                icon: Icons.person_outline,
-                label: localizations.text('profileTab'),
-                selected: false,
-                onTap: () => context.go(AppRoutes.settings),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? JobsScreen._brandColor : const Color(0xFF9AA7AD);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

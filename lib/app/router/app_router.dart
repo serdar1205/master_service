@@ -13,9 +13,14 @@ import '../../features/map/presentation/screens/map_screen.dart';
 import '../../features/master_profile/presentation/screens/master_home_screen.dart';
 import '../../features/master_profile/presentation/screens/profile_setup_screen.dart';
 import '../../features/payments/presentation/screens/payments_screen.dart';
+import '../../features/settings/presentation/screens/account_settings_screen.dart';
+import '../../features/settings/presentation/screens/edit_profile_screen.dart';
+import '../../features/settings/presentation/screens/payment_history_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/screens/support_screen.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
+import 'main_shell.dart';
 
 class AppRouter {
   AppRouter(this._authCubit)
@@ -45,21 +50,31 @@ class AppRouter {
           path: AppRoutes.categorySetup,
           builder: (context, state) => const CategorySetupScreen(),
         ),
-        GoRoute(
-          path: AppRoutes.home,
-          builder: (context, state) => const MasterHomeScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.jobs,
-          builder: (context, state) => const JobsScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.jobDetails,
-          builder: (context, state) => const JobDetailsScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.map,
-          builder: (context, state) => const MapScreen(),
+        ShellRoute(
+          builder: (context, state, child) =>
+              MainShell(state: state, child: child),
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (context, state) => const MasterHomeScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.jobs,
+              builder: (context, state) => const JobsScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.jobDetails,
+              builder: (context, state) => const JobDetailsScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.map,
+              builder: (context, state) => const MapScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.settings,
+              builder: (context, state) => const SettingsScreen(),
+            ),
+          ],
         ),
         GoRoute(
           path: AppRoutes.history,
@@ -70,8 +85,20 @@ class AppRouter {
           builder: (context, state) => const PaymentsScreen(),
         ),
         GoRoute(
-          path: AppRoutes.settings,
-          builder: (context, state) => const SettingsScreen(),
+          path: AppRoutes.editProfile,
+          builder: (context, state) => const EditProfileScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.accountSettings,
+          builder: (context, state) => const AccountSettingsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.paymentHistory,
+          builder: (context, state) => const PaymentHistoryScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.supportCenter,
+          builder: (context, state) => const SupportScreen(),
         ),
       ],
       errorBuilder: (context, state) => Scaffold(
