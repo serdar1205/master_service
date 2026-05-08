@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'dart:ui';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../application/home_cubit.dart';
@@ -14,8 +15,8 @@ import '../../data/local_home_repository.dart';
 class MasterHomeScreen extends StatelessWidget {
   const MasterHomeScreen({super.key});
 
-  static const _brandColor = Color(0xFF4C9397);
-  static const _buttonColor = Color(0xFF63C6CB);
+  static const _brandColor = AppColors.brandLight;
+  static const _buttonColor = AppColors.buttonTeal;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +99,7 @@ class MasterHomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _CurrentJobCard(localizations: localizations),
+                      _CurrentJobsSlider(localizations: localizations),
                       const SizedBox(height: 20),
                       _SectionHeader(
                         title: localizations.text('newOrders'),
@@ -418,9 +419,10 @@ class _StatusChip extends StatelessWidget {
 }
 
 class _CurrentJobCard extends StatelessWidget {
-  const _CurrentJobCard({required this.localizations});
+  const _CurrentJobCard({required this.localizations, required this.job});
 
   final AppLocalizations localizations;
+  final _CurrentJobVm job;
 
   @override
   Widget build(BuildContext context) {
@@ -453,10 +455,10 @@ class _CurrentJobCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _CategoryPill(label: 'Santehnik'),
+                          _CategoryPill(label: job.category),
                           const SizedBox(height: 8),
                           Text(
-                            'Suw akmasyny\ndüzetmek',
+                            job.title,
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
                                   color: const Color(0xFF11191C),
@@ -472,8 +474,7 @@ class _CurrentJobCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '180\nTMT',
-                          textAlign: TextAlign.end,
+                          '${job.price}\nTMT',
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 color: MasterHomeScreen._brandColor,
@@ -502,7 +503,7 @@ class _CurrentJobCard extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () =>
-                            context.go(AppRoutes.jobDetailsPath('job-2')),
+                            context.go(AppRoutes.jobDetailsPath(job.jobId)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: MasterHomeScreen._buttonColor,
                           foregroundColor: Colors.white,
@@ -540,6 +541,69 @@ class _CurrentJobCard extends StatelessWidget {
   }
 }
 
+class _CurrentJobsSlider extends StatelessWidget {
+  const _CurrentJobsSlider({required this.localizations});
+
+  final AppLocalizations localizations;
+
+  static const _jobs = [
+    _CurrentJobVm(
+      jobId: 'job-1',
+      category: 'Santehnik',
+      title: 'Suw akmasyny\ndüzetmek',
+      price: 180,
+    ),
+    _CurrentJobVm(
+      jobId: 'job-2',
+      category: 'Elektrik',
+      title: 'Rozetka\nçalyşmak',
+      price: 220,
+    ),
+    _CurrentJobVm(
+      jobId: 'job-3',
+      category: 'Ussa',
+      title: 'Gapy gulpuny\nbejeriş',
+      price: 150,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 420,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _jobs.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final width = MediaQuery.sizeOf(context).width - 44;
+          return SizedBox(
+            width: width.clamp(280.0, 420.0),
+            child: _CurrentJobCard(
+              localizations: localizations,
+              job: _jobs[index],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CurrentJobVm {
+  const _CurrentJobVm({
+    required this.jobId,
+    required this.category,
+    required this.title,
+    required this.price,
+  });
+
+  final String jobId;
+  final String category;
+  final String title;
+  final int price;
+}
+
 class _MapPreview extends StatelessWidget {
   const _MapPreview({required this.localizations});
 
@@ -565,7 +629,7 @@ class _MapPreview extends StatelessWidget {
                       urlTemplate:
                           'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
                       subdomains: ['a', 'b', 'c', 'd'],
-                      userAgentPackageName: 'com.ustahyzmaty.master_service',
+                      userAgentPackageName: 'com.example.master_service',
                     ),
                   ],
                 ),
@@ -828,7 +892,10 @@ class _NewOrderCard extends StatelessWidget {
                 ),
                 child: Text(
                   localizations.text('accept'),
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],

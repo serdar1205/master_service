@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../application/jobs_cubit.dart';
@@ -11,8 +12,8 @@ import '../../data/local_jobs_repository.dart';
 class JobsScreen extends StatelessWidget {
   const JobsScreen({super.key});
 
-  static const _brandColor = Color(0xFF087D83);
-  static const _buttonColor = Color(0xFF63C6CB);
+  static const _brandColor = AppColors.brand;
+  static const _buttonColor = AppColors.buttonTeal;
 
   @override
   Widget build(BuildContext context) {

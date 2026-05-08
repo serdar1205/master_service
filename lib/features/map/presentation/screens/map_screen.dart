@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../application/map_cubit.dart';
 import '../../data/local_map_repository.dart';
@@ -11,8 +12,8 @@ import '../../data/local_map_repository.dart';
 class MapScreen extends StatelessWidget {
   const MapScreen({super.key});
 
-  static const _brandColor = Color(0xFF087D83);
-  static const _buttonColor = Color(0xFF63C6CB);
+  static const _brandColor = AppColors.brand;
+  static const _buttonColor = AppColors.buttonTeal;
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +106,7 @@ class _ServiceMap extends StatelessWidget {
               urlTemplate:
                   'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
               subdomains: const ['a', 'b', 'c', 'd'],
-              userAgentPackageName: 'com.ustahyzmaty.master_service',
+              userAgentPackageName: 'com.example.master_service',
             ),
             MarkerLayer(
               markers: [

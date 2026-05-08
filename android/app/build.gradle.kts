@@ -14,7 +14,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.ustahyzmaty.master_service"
+    namespace = "com.example.master_service"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -28,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.ustahyzmaty.master_service"
+        applicationId = "com.example.master_service"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -52,6 +52,10 @@ android {
         release {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
+            } else {
+                // Local fallback: keep release APK installable on devices
+                // when a dedicated release keystore is not configured yet.
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }

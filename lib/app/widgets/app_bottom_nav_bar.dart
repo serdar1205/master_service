@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
+import '../theme/app_colors.dart';
 import '../router/app_routes.dart';
 
 enum AppBottomTab { home, jobs, map, profile }
@@ -20,7 +21,7 @@ class AppBottomNavBar extends StatelessWidget {
   final Color backgroundColor;
   final BorderRadius borderRadius;
 
-  static const _brandColor = Color(0xFF087D83);
+  static const _brandColor = AppColors.brand;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class AppBottomNavBar extends StatelessWidget {
         borderRadius: borderRadius,
         boxShadow: const [
           BoxShadow(
-            color: Color(0x12000000),
+            color: AppColors.k12000000,
             blurRadius: 12,
             offset: Offset(0, -3),
           ),
@@ -90,9 +91,7 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected
-        ? AppBottomNavBar._brandColor
-        : const Color(0xFF9AA7AD);
+    final color = selected ? AppBottomNavBar._brandColor : AppColors.kFF9AA7AD;
 
     return InkWell(
       onTap: onTap,

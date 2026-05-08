@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../application/auth_cubit.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    const brandColor = Color(0xFF087D83);
+    const brandColor = AppColors.brand;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF3FAFA),
@@ -224,10 +225,10 @@ class _LoginCard extends StatelessWidget {
             ElevatedButton(
               onPressed: state.isLoading ? null : onSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF63C6CB),
+                backgroundColor: AppColors.buttonTeal,
                 foregroundColor: Colors.white,
                 elevation: 8,
-                shadowColor: const Color(0xFF63C6CB).withValues(alpha: 0.18),
+                shadowColor: AppColors.buttonTeal.withValues(alpha: 0.18),
                 minimumSize: const Size.fromHeight(54),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),

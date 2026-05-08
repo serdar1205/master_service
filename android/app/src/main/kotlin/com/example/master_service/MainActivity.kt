@@ -1,4 +1,4 @@
-package com.ustahyzmaty.master_service
+package com.example.master_service
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../application/job_details_cubit.dart';
 import '../../data/local_jobs_repository.dart';
 
-const _brandColor = Color(0xFF087D83);
-const _buttonColor = Color(0xFF63C6CB);
+const _brandColor = AppColors.brand;
+const _buttonColor = AppColors.buttonTeal;
 
 class JobDetailsScreen extends StatelessWidget {
   const JobDetailsScreen({super.key});

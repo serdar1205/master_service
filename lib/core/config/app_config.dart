@@ -12,9 +12,13 @@ class AppConfig {
   );
 
   static const requestTimeout = Duration(seconds: 30);
+  static const requireRuntimeConfig = bool.fromEnvironment(
+    'REQUIRE_RUNTIME_CONFIG',
+    defaultValue: false,
+  );
 
   static void validateOrThrow({required bool isDebugMode}) {
-    if (isDebugMode) {
+    if (isDebugMode || !requireRuntimeConfig) {
       return;
     }
 

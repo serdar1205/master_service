@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 class AppTheme {
   const AppTheme._();
 
-  static const _seedColor = Color(0xFF5CC2C8);
-
   static ThemeData get light {
+    const seedColor = AppColors.seedTeal;
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: _seedColor,
+      seedColor: seedColor,
       brightness: Brightness.light,
     );
     final baseTextTheme = ThemeData.light(useMaterial3: true).textTheme;
