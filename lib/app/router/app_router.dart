@@ -5,13 +5,11 @@ import '../../features/auth/application/auth_cubit.dart';
 import '../../features/auth/presentation/screens/otp_verification_screen.dart';
 import '../../features/auth/presentation/screens/phone_login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/categories/presentation/screens/category_setup_screen.dart';
 import '../../features/jobs/presentation/screens/job_history_screen.dart';
 import '../../features/jobs/presentation/screens/job_details_screen.dart';
 import '../../features/jobs/presentation/screens/jobs_screen.dart';
 import '../../features/map/presentation/screens/map_screen.dart';
 import '../../features/master_profile/presentation/screens/master_home_screen.dart';
-import '../../features/master_profile/presentation/screens/profile_setup_screen.dart';
 import '../../features/payments/presentation/screens/payments_screen.dart';
 import '../../features/settings/presentation/screens/account_settings_screen.dart';
 import '../../features/settings/presentation/screens/edit_profile_screen.dart';
@@ -41,14 +39,6 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.otp,
           builder: (context, state) => const OtpVerificationScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.profileSetup,
-          builder: (context, state) => const ProfileSetupScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.categorySetup,
-          builder: (context, state) => const CategorySetupScreen(),
         ),
         ShellRoute(
           builder: (context, state, child) =>
@@ -136,19 +126,7 @@ class AppRouter {
       return location == AppRoutes.phoneLogin ? null : AppRoutes.phoneLogin;
     }
 
-    if (!authState.profileComplete) {
-      return location == AppRoutes.profileSetup ? null : AppRoutes.profileSetup;
-    }
-
-    if (!authState.categoriesComplete) {
-      return location == AppRoutes.categorySetup
-          ? null
-          : AppRoutes.categorySetup;
-    }
-
-    if (isAuthRoute ||
-        location == AppRoutes.profileSetup ||
-        location == AppRoutes.categorySetup) {
+    if (isAuthRoute) {
       return AppRoutes.home;
     }
 

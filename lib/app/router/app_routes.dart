@@ -4,8 +4,6 @@ class AppRoutes {
   static const splash = '/';
   static const phoneLogin = '/login';
   static const otp = '/otp';
-  static const profileSetup = '/profile-setup';
-  static const categorySetup = '/category-setup';
   static const home = '/home';
   static const jobs = '/jobs';
   static const jobDetails = '/jobs/:jobId';

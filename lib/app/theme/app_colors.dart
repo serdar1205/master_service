@@ -9,7 +9,7 @@ class AppColors {
   const AppColors._();
 
   // Single primary color used for main accents (buttons, icons, highlights).
-  static const primary = kFF63C6CB;
+  static const primary = kFF3B82F6;
 
   // Semantic aliases kept for compatibility; all point to one primary source.
   static const brand = primary;
@@ -49,6 +49,7 @@ class AppColors {
   static const kFF30393D = Color(0xFF30393D);
   static const kFF3B629B = Color(0xFF3B629B);
   static const kFF3B70D8 = Color(0xFF3B70D8);
+  static const kFF3B82F6 = Color(0xFF3B82F6);
   static const kFF424C52 = Color(0xFF424C52);
   static const kFF426A63 = Color(0xFF426A63);
   static const kFF4290A3 = Color(0xFF4290A3);

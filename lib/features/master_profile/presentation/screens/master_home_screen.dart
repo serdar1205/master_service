@@ -202,18 +202,18 @@ class _AnimatedHomeHeader extends StatelessWidget {
               ),
             ),
             // Gradient overlay
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: lerpDouble(0.10, 0.04, t)!),
-                    Colors.black.withValues(alpha: bottomScrim),
-                  ],
-                ),
-              ),
-            ),
+            // DecoratedBox(
+            //   decoration: BoxDecoration(
+            //     gradient: LinearGradient(
+            //       begin: Alignment.topCenter,
+            //       end: Alignment.bottomCenter,
+            //       colors: [
+            //         Colors.black.withValues(alpha: lerpDouble(0.10, 0.04, t)!),
+            //         Colors.black.withValues(alpha: bottomScrim),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             // Blur effect on toolbar area
             Align(
               alignment: Alignment.topCenter,
