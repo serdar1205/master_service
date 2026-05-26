@@ -73,6 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return value.replaceAll(RegExp(r'[^0-9]'), '');
   }
 
-  static final _phonePattern = RegExp(r'^\d{11,12}$');
+  /// Turkmen local number: 8 digits, optionally prefixed with country code 993.
+  static final _phonePattern = RegExp(r'^(\d{8}|993\d{8})$');
   static final _otpPattern = RegExp(r'^\d{4,6}$');
 }

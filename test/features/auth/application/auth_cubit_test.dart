@@ -54,7 +54,7 @@ void main() {
     await cubit.requestOtp('+993');
 
     expect(cubit.state.status, AuthStatus.failure);
-    expect(cubit.state.errorMessage, 'Enter a valid Turkmen phone number.');
+    expect(cubit.state.errorMessage, 'Enter a valid 8-digit phone number.');
   });
 
   test('verifyOtp success transitions to authenticated', () async {

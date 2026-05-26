@@ -108,6 +108,10 @@ class AppLocalizations {
       'accessActive': 'Elýeterlilik işjeň',
       'accessExpired': 'Elýeterlilik möhleti gutardy',
       'signOut': 'Çykmak',
+      'signOutConfirmTitle': 'Çykmagy tassyklaň',
+      'signOutConfirmMessage':
+          'Hakykatdanam hasabyňyzdan çykmak isleýärsiňizmi?',
+      'cancel': 'Ýatyr',
       'placeholder': 'Bu bölüm API şertnamasy taýýar bolanda ösdüriler.',
     },
     'ru': {
@@ -201,6 +205,9 @@ class AppLocalizations {
       'accessActive': 'Доступ активен',
       'accessExpired': 'Срок доступа истек',
       'signOut': 'Выйти',
+      'signOutConfirmTitle': 'Выйти из аккаунта?',
+      'signOutConfirmMessage': 'Вы уверены, что хотите выйти?',
+      'cancel': 'Отмена',
       'placeholder': 'Раздел будет развит после готовности API-контракта.',
     },
   };

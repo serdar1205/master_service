@@ -182,7 +182,7 @@ class AuthCubit extends Cubit<AuthState> {
   String _friendlyAuthError(Object error) {
     if (error is ArgumentError) {
       if (error.message == 'invalid_phone') {
-        return 'Enter a valid Turkmen phone number.';
+        return 'Enter a valid 8-digit phone number.';
       }
 
       if (error.message == 'invalid_otp') {

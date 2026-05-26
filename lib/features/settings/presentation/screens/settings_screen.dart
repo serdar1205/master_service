@@ -421,10 +421,34 @@ class _SignOutButton extends StatelessWidget {
 
   final AppLocalizations localizations;
 
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(localizations.text('signOutConfirmTitle')),
+        content: Text(localizations.text('signOutConfirmMessage')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(localizations.text('cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(localizations.text('signOut')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await context.read<AuthCubit>().signOut();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      onPressed: context.read<AuthCubit>().signOut,
+      onPressed: () => _confirmSignOut(context),
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFFB3262E),
         backgroundColor: Colors.white,

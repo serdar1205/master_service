@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
@@ -186,16 +187,19 @@ class _LoginCard extends StatelessWidget {
             const SizedBox(height: 8),
             TextField(
               controller: phoneController,
-              keyboardType: TextInputType.phone,
+              keyboardType: TextInputType.number,
               textInputAction: TextInputAction.done,
+              maxLength: 8,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: theme.textTheme.titleMedium?.copyWith(
                 color: const Color(0xFF4B5960),
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.1,
               ),
               decoration: InputDecoration(
+                counterText: '',
                 prefixText: '+993  ',
-                hintText: '61 00 00 00',
+                hintText: '61000000',
                 hintStyle: const TextStyle(color: Color(0xFF8D989D)),
                 filled: true,
                 fillColor: const Color(0xFFF0F5F6),
@@ -334,7 +338,7 @@ class _TrustBadges extends StatelessWidget {
             iconBackgroundColor: const Color(0xFFE5FCF8),
           ),
         ),
-        const SizedBox(width: 18),
+        const SizedBox(width: 8),
         Expanded(
           child: _TrustBadge(
             icon: Icons.speed_outlined,
@@ -366,7 +370,7 @@ class _TrustBadge extends StatelessWidget {
     final lines = text.split('\n');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -408,7 +412,7 @@ class _TrustBadge extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   lines.length > 1 ? lines[1] : '',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: const Color(0xFF172025),
                     fontWeight: FontWeight.w700,
                   ),
