@@ -14,26 +14,30 @@ class MapMarkerItem {
 
 class MapOfferData {
   const MapOfferData({
+    required this.id,
     required this.titleKey,
     required this.distanceKey,
     required this.priceText,
+    required this.iconCode,
   });
 
+  final String id;
   final String titleKey;
   final String distanceKey;
   final String priceText;
+  final int iconCode;
 }
 
 class MapData {
   const MapData({
     required this.center,
     required this.markers,
-    required this.offer,
+    required this.offers,
   });
 
   final LatLng center;
   final List<MapMarkerItem> markers;
-  final MapOfferData offer;
+  final List<MapOfferData> offers;
 }
 
 class LocalMapRepository {
@@ -59,11 +63,29 @@ class LocalMapRepository {
           labelKey: 'newRequest',
         ),
       ],
-      offer: MapOfferData(
-        titleKey: 'installSocket',
-        distanceKey: 'distanceTime',
-        priceText: '150\nTMT',
-      ),
+      offers: [
+        MapOfferData(
+          id: 'map-offer-1',
+          titleKey: 'installSocket',
+          distanceKey: 'distanceTime',
+          priceText: '150\nTMT',
+          iconCode: 0xe0b7,
+        ),
+        MapOfferData(
+          id: 'map-offer-2',
+          titleKey: 'mapOfferCleaning',
+          distanceKey: 'distanceTime',
+          priceText: '120\nTMT',
+          iconCode: 0xecf8,
+        ),
+        MapOfferData(
+          id: 'map-offer-3',
+          titleKey: 'mapOfferHandyman',
+          distanceKey: 'distanceTime',
+          priceText: '200\nTMT',
+          iconCode: 0xe9d0,
+        ),
+      ],
     );
   }
 }

@@ -11,5 +11,6 @@ void main() {
 
     expect(cubit.state.status, AppStatus.success);
     expect(cubit.state.data?.markers.length, 3);
+    expect(cubit.state.data?.offers.length, 3);
   });
 }

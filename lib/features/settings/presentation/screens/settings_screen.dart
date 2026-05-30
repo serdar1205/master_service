@@ -71,8 +71,8 @@ class SettingsScreen extends StatelessWidget {
                           menuItemKeys: profile.menuItemKeys,
                           onAccountTap: () =>
                               context.push(AppRoutes.accountSettings),
-                          onPaymentTap: () =>
-                              context.push(AppRoutes.paymentHistory),
+                          // onPaymentTap: () =>
+                          //     context.push(AppRoutes.paymentHistory),
                           onSupportTap: () =>
                               context.push(AppRoutes.supportCenter),
                         ),
@@ -326,14 +326,14 @@ class _SettingsMenu extends StatelessWidget {
     required this.localizations,
     required this.menuItemKeys,
     required this.onAccountTap,
-    required this.onPaymentTap,
+    // required this.onPaymentTap,
     required this.onSupportTap,
   });
 
   final AppLocalizations localizations;
   final List<String> menuItemKeys;
   final VoidCallback onAccountTap;
-  final VoidCallback onPaymentTap;
+  // final VoidCallback onPaymentTap;
   final VoidCallback onSupportTap;
 
   @override
@@ -357,12 +357,12 @@ class _SettingsMenu extends StatelessWidget {
             title: localizations.text(menuItemKeys[0]),
             onTap: onAccountTap,
           ),
-          const Divider(height: 1, color: Color(0xFFF0F3F4)),
-          _SettingsTile(
-            icon: Icons.payments_outlined,
-            title: localizations.text(menuItemKeys[1]),
-            onTap: onPaymentTap,
-          ),
+          // const Divider(height: 1, color: Color(0xFFF0F3F4)),
+          // _SettingsTile(
+          //   icon: Icons.payments_outlined,
+          //   title: localizations.text(menuItemKeys[1]),
+          //   onTap: onPaymentTap,
+          // ),
           const Divider(height: 1, color: Color(0xFFF0F3F4)),
           _SettingsTile(
             icon: Icons.support_agent_outlined,

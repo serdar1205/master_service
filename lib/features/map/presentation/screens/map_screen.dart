@@ -9,6 +9,8 @@ import '../../../../core/utils/app_status.dart';
 import '../../application/map_cubit.dart';
 import '../../data/local_map_repository.dart';
 
+IconData _materialIcon(int code) => IconData(code, fontFamily: 'MaterialIcons');
+
 class MapScreen extends StatelessWidget {
   const MapScreen({super.key});
 
@@ -25,28 +27,6 @@ class MapScreen extends StatelessWidget {
         body: Stack(
           children: [
             Positioned.fill(child: _ServiceMap(localizations: localizations)),
-            SafeArea(
-              bottom: false,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  height: 44,
-                  margin: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.78),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            // SafeArea(
-            //   child: Column(
-            //     children: [
-            //       _MapHeader(localizations: localizations),
-            //       const Spacer(),
-            //     ],
-            //   ),
-            // ),
             const Positioned(
               right: 18,
               top: 124,
@@ -58,14 +38,29 @@ class MapScreen extends StatelessWidget {
               child: _MapControl(icon: Icons.layers_outlined),
             ),
             Positioned(
-              left: 14,
-              right: 14,
+              left: 0,
+              right: 0,
               bottom: 76,
-              child: _RequestSheet(localizations: localizations),
+              child: BlocBuilder<MapCubit, MapState>(
+                builder: (context, state) {
+                  if (state.status != AppStatus.success) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final offers = state.data?.offers ?? const [];
+                  if (offers.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return _MapOffersSlider(
+                    localizations: localizations,
+                    offers: offers,
+                  );
+                },
+              ),
             ),
           ],
         ),
-        //   bottomNavigationBar: _MapBottomNavigation(localizations: localizations),
       ),
     );
   }
@@ -285,10 +280,56 @@ class _CurrentLocationMarker extends StatelessWidget {
   }
 }
 
-class _RequestSheet extends StatelessWidget {
-  const _RequestSheet({required this.localizations});
+class _MapOffersSlider extends StatelessWidget {
+  const _MapOffersSlider({required this.localizations, required this.offers});
 
   final AppLocalizations localizations;
+  final List<MapOfferData> offers;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 54,
+          height: 6,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE0E4E8),
+            borderRadius: BorderRadius.circular(99),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 218,
+          width: double.infinity,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            itemCount: offers.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final width = MediaQuery.sizeOf(context).width - 28;
+              return SizedBox(
+                width: width,
+                child: _MapOrderCard(
+                  localizations: localizations,
+                  offer: offers[index],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MapOrderCard extends StatelessWidget {
+  const _MapOrderCard({required this.localizations, required this.offer});
+
+  final AppLocalizations localizations;
+  final MapOfferData offer;
 
   @override
   Widget build(BuildContext context) {
@@ -308,15 +349,6 @@ class _RequestSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 54,
-            height: 6,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0E4E8),
-              borderRadius: BorderRadius.circular(99),
-            ),
-          ),
-          const SizedBox(height: 14),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -327,8 +359,8 @@ class _RequestSheet extends StatelessWidget {
                   color: const Color(0xFFE6FAF8),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(
-                  Icons.electrical_services,
+                child: Icon(
+                  _materialIcon(offer.iconCode),
                   color: MapScreen._brandColor,
                   size: 28,
                 ),
@@ -339,7 +371,7 @@ class _RequestSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      localizations.text('installSocket'),
+                      localizations.text(offer.titleKey),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: const Color(0xFF172025),
                         fontWeight: FontWeight.w500,
@@ -356,7 +388,7 @@ class _RequestSheet extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          localizations.text('distanceTime'),
+                          localizations.text(offer.distanceKey),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: const Color(0xFF66767D)),
                         ),
@@ -366,7 +398,7 @@ class _RequestSheet extends StatelessWidget {
                 ),
               ),
               Text(
-                '150\nTMT',
+                offer.priceText,
                 textAlign: TextAlign.end,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: MapScreen._brandColor,
@@ -432,17 +464,3 @@ class _RequestSheet extends StatelessWidget {
   }
 }
 
-// class _MapBottomNavigation extends StatelessWidget {
-//   const _MapBottomNavigation({required this.localizations});
-//
-//   final AppLocalizations localizations;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return AppBottomNavBar(
-//       localizations: localizations,
-//       selectedTab: AppBottomTab.map,
-//       backgroundColor: Colors.white.withValues(alpha: 0.86),
-//     );
-//   }
-// }
