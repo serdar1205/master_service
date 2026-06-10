@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +8,9 @@ import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
+import '../../../../app/di/app_repositories.dart';
 import '../../application/jobs_cubit.dart';
-import '../../data/local_jobs_repository.dart';
+import '../../domain/order_models.dart';
 
 class JobsScreen extends StatelessWidget {
   const JobsScreen({super.key});
@@ -19,8 +22,20 @@ class JobsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
 
+    final repositories = AppRepositoriesScope.of(context);
+
     return BlocProvider(
-      create: (_) => JobsCubit(const LocalJobsRepository())..load(),
+      create: (_) {
+        final cubit = JobsCubit(repositories.ordersRepository);
+        unawaited(
+          cubit.load().then((_) {
+            repositories.activeOrderHolder.updateFromDashboard(
+              cubit.state.data,
+            );
+          }),
+        );
+        return cubit;
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFFF4FBFB),
         body: SafeArea(
@@ -102,9 +117,21 @@ class JobsScreen extends StatelessWidget {
                                 : Icons.phone_outlined,
                             outlinedPrimary:
                                 data.activeJobs[i].isOutlinedAction,
-                            onPrimaryAction: () => context.go(
-                              AppRoutes.jobDetailsPath(data.activeJobs[i].id),
-                            ),
+                            onPrimaryAction: () async {
+                              final job = data.activeJobs[i];
+                              if (job.actionKey == 'startJob') {
+                                final cubit = context.read<JobsCubit>();
+                                final started = await cubit.startOrder(job.id);
+                                if (started && context.mounted) {
+                                  repositories.activeOrderHolder
+                                      .updateFromDashboard(cubit.state.data);
+                                }
+                                return;
+                              }
+                              if (context.mounted) {
+                                context.go(AppRoutes.jobDetailsPath(job.id));
+                              }
+                            },
                             onSecondaryAction: () {},
                           ),
                           if (i != data.activeJobs.length - 1)
@@ -126,10 +153,11 @@ class JobsScreen extends StatelessWidget {
                               ?.copyWith(color: const Color(0xFF526168)),
                         ),
                         const SizedBox(height: 14),
-                        _HistoryCard(
-                          localizations: localizations,
-                          job: data.historyJobs.first,
-                        ),
+                        if (data.historyJobs.isNotEmpty)
+                          _HistoryCard(
+                            localizations: localizations,
+                            job: data.historyJobs.first,
+                          ),
                       ],
                     );
                   },

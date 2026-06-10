@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/widgets/turkmen_phone_field.dart';
 import '../../application/auth_cubit.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
@@ -73,7 +73,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   }
 
   void _submit(BuildContext context) {
-    context.read<AuthCubit>().requestOtp('+993 ${_phoneController.text}');
+    context.read<AuthCubit>().requestOtp(_phoneController.text);
   }
 }
 
@@ -185,37 +185,9 @@ class _LoginCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
+            TurkmenPhoneField(
               controller: phoneController,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
-              maxLength: 8,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF4B5960),
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.1,
-              ),
-              decoration: InputDecoration(
-                counterText: '',
-                prefixText: '+993  ',
-                hintText: '61000000',
-                hintStyle: const TextStyle(color: Color(0xFF8D989D)),
-                filled: true,
-                fillColor: const Color(0xFFF0F5F6),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 19,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFFBCC9CD)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: brandColor, width: 1.4),
-                ),
-              ),
+              focusedBorderColor: brandColor,
               onSubmitted: (_) => onSubmit(),
             ),
             if (state.errorMessage != null) ...[

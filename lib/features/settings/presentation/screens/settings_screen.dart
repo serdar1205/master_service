@@ -7,8 +7,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../auth/application/auth_cubit.dart';
+import '../../../../app/di/app_repositories.dart';
 import '../../application/profile_cubit.dart';
-import '../../data/local_profile_repository.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -19,8 +19,10 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
 
+    final repositories = AppRepositoriesScope.of(context);
+
     return BlocProvider(
-      create: (_) => ProfileCubit(const LocalProfileRepository())..load(),
+      create: (_) => ProfileCubit(repositories.profileRepository)..load(),
       child: Scaffold(
         backgroundColor: const Color(0xFFF4FBFB),
         body: SafeArea(

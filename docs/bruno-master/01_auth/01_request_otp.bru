@@ -1,0 +1,38 @@
+meta {
+  name: Request OTP
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/v1/master/auth/request-otp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "phone": "+99362111222"
+  }
+}
+
+docs {
+  # Request OTP
+
+  Sends an OTP code to the master's phone number via SMS.
+  Currently the code is written to `storage/logs/laravel.log` (TODO: SMS gateway).
+
+  **Response 200:**
+  ```json
+  { "message": "OTP sent." }
+  ```
+
+  **Errors:**
+  - `404` — master with this phone not found
+  - `403` — master account is disabled
+}

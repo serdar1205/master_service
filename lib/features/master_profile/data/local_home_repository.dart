@@ -1,3 +1,5 @@
+import '../../jobs/domain/order_models.dart';
+
 class HomeStat {
   const HomeStat({required this.value, required this.labelKey});
 
@@ -10,25 +12,13 @@ class HomeData {
     required this.greetingKey,
     required this.subtitleKey,
     required this.stats,
+    this.masterName,
+    this.activeJobs = const [],
   });
 
   final String greetingKey;
   final String subtitleKey;
   final List<HomeStat> stats;
-}
-
-class LocalHomeRepository {
-  const LocalHomeRepository();
-
-  Future<HomeData> fetchHomeData() async {
-    return const HomeData(
-      greetingKey: 'homeGreeting',
-      subtitleKey: 'homeSubtitle',
-      stats: [
-        HomeStat(value: '12', labelKey: 'active'),
-        HomeStat(value: '48', labelKey: 'completed'),
-        HomeStat(value: '3.4k', labelKey: 'earnings'),
-      ],
-    );
-  }
+  final String? masterName;
+  final List<JobListItem> activeJobs;
 }

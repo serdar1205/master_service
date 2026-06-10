@@ -12,16 +12,36 @@ class AppBottomNavBar extends StatelessWidget {
     required this.localizations,
     required this.selectedTab,
     super.key,
+    this.onTabSelected,
     this.backgroundColor = Colors.white,
     this.borderRadius = BorderRadius.zero,
   });
 
   final AppLocalizations localizations;
   final AppBottomTab selectedTab;
+  final ValueChanged<AppBottomTab>? onTabSelected;
   final Color backgroundColor;
   final BorderRadius borderRadius;
 
   static const _brandColor = AppColors.brand;
+
+  void _onTap(BuildContext context, AppBottomTab tab) {
+    if (onTabSelected != null) {
+      onTabSelected!(tab);
+      return;
+    }
+
+    switch (tab) {
+      case AppBottomTab.home:
+        context.go(AppRoutes.home);
+      case AppBottomTab.jobs:
+        context.go(AppRoutes.jobs);
+      case AppBottomTab.map:
+        context.go(AppRoutes.map);
+      case AppBottomTab.profile:
+        context.go(AppRoutes.settings);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,25 +68,25 @@ class AppBottomNavBar extends StatelessWidget {
                 icon: Icons.home_work_outlined,
                 label: localizations.text('homeTab'),
                 selected: selectedTab == AppBottomTab.home,
-                onTap: () => context.go(AppRoutes.home),
+                onTap: () => _onTap(context, AppBottomTab.home),
               ),
               _BottomNavItem(
                 icon: Icons.handyman_outlined,
                 label: localizations.text('ordersTab'),
                 selected: selectedTab == AppBottomTab.jobs,
-                onTap: () => context.go(AppRoutes.jobs),
+                onTap: () => _onTap(context, AppBottomTab.jobs),
               ),
               _BottomNavItem(
                 icon: Icons.map_outlined,
                 label: localizations.text('mapTab'),
                 selected: selectedTab == AppBottomTab.map,
-                onTap: () => context.go(AppRoutes.map),
+                onTap: () => _onTap(context, AppBottomTab.map),
               ),
               _BottomNavItem(
                 icon: Icons.person_outline,
                 label: localizations.text('profileTab'),
                 selected: selectedTab == AppBottomTab.profile,
-                onTap: () => context.go(AppRoutes.settings),
+                onTap: () => _onTap(context, AppBottomTab.profile),
               ),
             ],
           ),

@@ -2,10 +2,16 @@ class AuthSession {
   const AuthSession({
     required this.profileComplete,
     required this.categoriesComplete,
+    this.masterId,
+    this.masterName,
+    this.masterPhone,
   });
 
   final bool profileComplete;
   final bool categoriesComplete;
+  final int? masterId;
+  final String? masterName;
+  final String? masterPhone;
 }
 
 abstract interface class AuthRepository {
@@ -23,4 +29,6 @@ abstract interface class AuthRepository {
   Future<AuthSession> markCategoriesComplete();
 
   Future<void> signOut();
+
+  Future<void> clearLocalSession();
 }

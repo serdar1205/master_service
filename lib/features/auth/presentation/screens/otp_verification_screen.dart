@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../core/utils/phone_formatter.dart';
 import '../../../../core/widgets/primary_action_button.dart';
 import '../../application/auth_cubit.dart';
 
@@ -40,7 +41,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
-                  Text(localizations.text('otpSubtitle')),
+                  Text(
+                    state.phoneNumber == null
+                        ? localizations.text('otpSubtitle')
+                        : '${localizations.text('otpSubtitle')}\n'
+                              '${PhoneFormatter.toDisplayE164(state.phoneNumber!)}',
+                  ),
                   const SizedBox(height: 24),
                   TextField(
                     controller: _otpController,

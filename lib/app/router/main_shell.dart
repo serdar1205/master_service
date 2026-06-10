@@ -5,26 +5,36 @@ import '../localization/app_localizations.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 
 class MainShell extends StatelessWidget {
-  const MainShell({required this.child, required this.state, super.key});
+  const MainShell({required this.navigationShell, super.key});
 
-  final GoRouterState state;
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
-    final location = state.uri.path;
-    final selectedTab = switch (location) {
-      final l when l == '/map' => AppBottomTab.map,
-      final l when l == '/settings' => AppBottomTab.profile,
-      final l when l == '/jobs' || l.startsWith('/jobs/') => AppBottomTab.jobs,
+    final selectedTab = switch (navigationShell.currentIndex) {
+      1 => AppBottomTab.jobs,
+      2 => AppBottomTab.map,
+      3 => AppBottomTab.profile,
       _ => AppBottomTab.home,
     };
 
     return Scaffold(
-      body: child,
+      body: navigationShell,
       bottomNavigationBar: AppBottomNavBar(
         localizations: AppLocalizations.of(context),
         selectedTab: selectedTab,
+        onTabSelected: (tab) {
+          final index = switch (tab) {
+            AppBottomTab.home => 0,
+            AppBottomTab.jobs => 1,
+            AppBottomTab.map => 2,
+            AppBottomTab.profile => 3,
+          };
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
       ),
     );
   }

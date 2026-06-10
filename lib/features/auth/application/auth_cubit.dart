@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/network/api_exception.dart';
 import '../domain/auth_repository.dart';
 
 enum AuthStatus {
@@ -179,6 +180,17 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 
+  Future<void> handleSessionExpired() async {
+    if (!state.isAuthenticated &&
+        state.status != AuthStatus.otpRequested &&
+        state.status != AuthStatus.restoring) {
+      return;
+    }
+
+    await _authRepository.clearLocalSession();
+    emit(const AuthState(status: AuthStatus.unauthenticated));
+  }
+
   String _friendlyAuthError(Object error) {
     if (error is ArgumentError) {
       if (error.message == 'invalid_phone') {
@@ -188,6 +200,15 @@ class AuthCubit extends Cubit<AuthState> {
       if (error.message == 'invalid_otp') {
         return 'Enter a valid OTP code.';
       }
+    }
+
+    if (error is ApiException) {
+      return switch (error.statusCode) {
+        404 => 'Phone number is not registered.',
+        403 => 'This account is disabled.',
+        422 => 'Invalid or expired OTP code.',
+        _ => error.message,
+      };
     }
 
     return 'We could not complete authentication. Please try again.';

@@ -39,6 +39,13 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+
+  var clearLocalSessionCalls = 0;
+
+  @override
+  Future<void> clearLocalSession() async {
+    clearLocalSessionCalls++;
+  }
 }
 
 void main() {
@@ -63,5 +70,17 @@ void main() {
     await cubit.verifyOtp('1234');
 
     expect(cubit.state.status, AuthStatus.authenticated);
+  });
+
+  test('handleSessionExpired clears session and signs out', () async {
+    final repository = _FakeAuthRepository();
+    final cubit = AuthCubit(repository);
+    await cubit.requestOtp('+99361000000');
+    await cubit.verifyOtp('1234');
+
+    await cubit.handleSessionExpired();
+
+    expect(repository.clearLocalSessionCalls, 1);
+    expect(cubit.state.status, AuthStatus.unauthenticated);
   });
 }

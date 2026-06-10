@@ -42,7 +42,8 @@ class AppLocalizations {
           'Bir ýa-da birnäçe hyzmat kategoriýasyny saýlaň.',
       'completeCategories': 'Kategoriýalary tamamla',
       'homeTitle': 'Ussa paneli',
-      'homeGreeting': 'Hoş geldiňiz, Myrat!',
+      'homeGreeting': 'Hoş geldiňiz!',
+      'homeGreetingNamed': 'Hoş geldiňiz, {name}!',
       'homeSubtitle': 'Bugun täze sargytlar bar.',
       'active': 'AKTIW',
       'completed': 'TAMAMLANAN',
@@ -68,6 +69,8 @@ class AppLocalizations {
       'homeTab': 'Baş sahypa',
       'ordersTab': 'Sargytlarym',
       'mapTab': 'Karta',
+      'mapTilesError':
+          'Karta döwüri ýüklenmedi. Internet baglanyşygyny barlaň.',
       'profileTab': 'Profil',
       'jobs': 'Sargytlar',
       'myJobsTitle': 'Meniň işlerim',
@@ -141,7 +144,8 @@ class AppLocalizations {
       'categorySetupSubtitle': 'Выберите одну или несколько категорий услуг.',
       'completeCategories': 'Завершить категории',
       'homeTitle': 'Панель мастера',
-      'homeGreeting': 'Добро пожаловать, Мурат!',
+      'homeGreeting': 'Добро пожаловать!',
+      'homeGreetingNamed': 'Добро пожаловать, {name}!',
       'homeSubtitle': 'Сегодня есть новые заявки.',
       'active': 'АКТИВНЫЕ',
       'completed': 'ЗАВЕРШЕНО',
@@ -167,6 +171,8 @@ class AppLocalizations {
       'homeTab': 'Главная',
       'ordersTab': 'Мои заявки',
       'mapTab': 'Карта',
+      'mapTilesError':
+          'Плитки карты не загрузились. Проверьте подключение к интернету.',
       'profileTab': 'Профиль',
       'jobs': 'Заявки',
       'myJobsTitle': 'Мои работы',
@@ -220,6 +226,24 @@ class AppLocalizations {
     return _localizedValues[locale.languageCode]?[key] ??
         _localizedValues['tk']![key] ??
         key;
+  }
+
+  String homeGreetingFor(String? fullName) {
+    final name = _firstName(fullName);
+    if (name.isEmpty) {
+      return text('homeGreeting');
+    }
+
+    return text('homeGreetingNamed').replaceAll('{name}', name);
+  }
+
+  String _firstName(String? fullName) {
+    final trimmed = fullName?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return '';
+    }
+
+    return trimmed.split(RegExp(r'\s+')).first;
   }
 }
 

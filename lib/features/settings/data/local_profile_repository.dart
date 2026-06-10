@@ -1,26 +1,19 @@
-class ProfileData {
-  const ProfileData({
-    required this.fullName,
-    required this.skills,
-    required this.locationKey,
-    required this.menuItemKeys,
-  });
+export '../domain/profile_repository.dart';
 
-  final String fullName;
-  final List<String> skills;
-  final String locationKey;
-  final List<String> menuItemKeys;
-}
+import '../domain/profile_repository.dart';
 
-class LocalProfileRepository {
+class LocalProfileRepository implements ProfileRepository {
   const LocalProfileRepository();
 
+  @override
   Future<ProfileData> fetchProfile() async {
     return const ProfileData(
       fullName: 'Merdan Berdiýew',
+      phone: '+99361000000',
       skills: ['Elektrika', 'Santexnika'],
       locationKey: 'profileLocation',
       menuItemKeys: ['settings', 'paymentHistory', 'support'],
+      balance: 0,
     );
   }
 }

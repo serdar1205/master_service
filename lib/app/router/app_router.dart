@@ -40,29 +40,48 @@ class AppRouter {
           path: AppRoutes.otp,
           builder: (context, state) => const OtpVerificationScreen(),
         ),
-        ShellRoute(
-          builder: (context, state, child) =>
-              MainShell(state: state, child: child),
-          routes: [
-            GoRoute(
-              path: AppRoutes.home,
-              builder: (context, state) => const MasterHomeScreen(),
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, navigationShell) {
+            return MainShell(navigationShell: navigationShell);
+          },
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoutes.home,
+                  builder: (context, state) => const MasterHomeScreen(),
+                ),
+              ],
             ),
-            GoRoute(
-              path: AppRoutes.jobs,
-              builder: (context, state) => const JobsScreen(),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoutes.jobs,
+                  builder: (context, state) => const JobsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: ':jobId',
+                      builder: (context, state) => const JobDetailsScreen(),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            GoRoute(
-              path: AppRoutes.jobDetails,
-              builder: (context, state) => const JobDetailsScreen(),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoutes.map,
+                  builder: (context, state) => const MapScreen(),
+                ),
+              ],
             ),
-            GoRoute(
-              path: AppRoutes.map,
-              builder: (context, state) => const MapScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.settings,
-              builder: (context, state) => const SettingsScreen(),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: AppRoutes.settings,
+                  builder: (context, state) => const SettingsScreen(),
+                ),
+              ],
             ),
           ],
         ),

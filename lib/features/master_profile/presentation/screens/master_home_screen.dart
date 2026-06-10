@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,8 +11,10 @@ import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
+import '../../../../app/di/app_repositories.dart';
+import '../../../../app/widgets/app_map_tile_layer.dart';
+import '../../../jobs/domain/order_models.dart';
 import '../../application/home_cubit.dart';
-import '../../data/local_home_repository.dart';
 
 class MasterHomeScreen extends StatelessWidget {
   const MasterHomeScreen({super.key});
@@ -22,8 +26,22 @@ class MasterHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
 
+    final repositories = AppRepositoriesScope.of(context);
+
     return BlocProvider(
-      create: (_) => HomeCubit(const LocalHomeRepository())..load(),
+      create: (_) {
+        final cubit = HomeCubit(
+          profileRepository: repositories.profileRepository,
+          ordersRepository: repositories.ordersRepository,
+        );
+        unawaited(
+          cubit.load().then((_) {
+            final jobs = cubit.state.data?.activeJobs ?? const [];
+            repositories.activeOrderHolder.updateFromActiveJobs(jobs);
+          }),
+        );
+        return cubit;
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFFF4FBFB),
         body: BlocBuilder<HomeCubit, HomeState>(
@@ -83,7 +101,10 @@ class MasterHomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      _Greeting(localizations: localizations),
+                      _Greeting(
+                        localizations: localizations,
+                        masterName: data.masterName,
+                      ),
                       const SizedBox(height: 18),
                       _StatsRow(
                         localizations: localizations,
@@ -99,7 +120,10 @@ class MasterHomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _CurrentJobsSlider(localizations: localizations),
+                      _CurrentJobsSlider(
+                        localizations: localizations,
+                        jobs: data.activeJobs,
+                      ),
                       const SizedBox(height: 20),
                       _SectionHeader(
                         title: localizations.text('newOrders'),
@@ -109,7 +133,11 @@ class MasterHomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _NewOrderCard(localizations: localizations),
+                      if (data.activeJobs.isNotEmpty)
+                        _NewOrderCard(
+                          localizations: localizations,
+                          job: data.activeJobs.first,
+                        ),
                     ]),
                   ),
                 ),
@@ -124,12 +152,15 @@ class MasterHomeScreen extends StatelessWidget {
 }
 
 class _Greeting extends StatelessWidget {
-  const _Greeting({required this.localizations});
+  const _Greeting({required this.localizations, required this.masterName});
 
   final AppLocalizations localizations;
+  final String? masterName;
 
   @override
   Widget build(BuildContext context) {
+    final avatarLabel = _avatarInitial(masterName);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,7 +169,7 @@ class _Greeting extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                localizations.text('homeGreeting'),
+                localizations.homeGreetingFor(masterName),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: const Color(0xFF101719),
                   fontWeight: FontWeight.w900,
@@ -157,13 +188,30 @@ class _Greeting extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 14),
-        const CircleAvatar(
+        CircleAvatar(
           radius: 24,
-          backgroundColor: Color(0xFFCFE3FF),
-          child: Icon(Icons.person, color: Color(0xFF3B70D8), size: 34),
+          backgroundColor: const Color(0xFFCFE3FF),
+          child: avatarLabel == null
+              ? const Icon(Icons.person, color: Color(0xFF3B70D8), size: 34)
+              : Text(
+                  avatarLabel,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: const Color(0xFF3B70D8),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
         ),
       ],
     );
+  }
+
+  String? _avatarInitial(String? fullName) {
+    final trimmed = fullName?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    return trimmed.substring(0, 1).toUpperCase();
   }
 }
 
@@ -186,8 +234,6 @@ class _AnimatedHomeHeader extends StatelessWidget {
           1.0,
         );
         final t = Curves.easeOutCubic.transform(rawT);
-
-        final bottomScrim = lerpDouble(0.42, 0.18, t)!;
 
         return Stack(
           fit: StackFit.expand,
@@ -474,7 +520,7 @@ class _CurrentJobCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${job.price}\nTMT',
+                          job.priceText,
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 color: MasterHomeScreen._brandColor,
@@ -496,7 +542,7 @@ class _CurrentJobCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const _LocationCard(),
+                _LocationCard(address: job.address),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -514,7 +560,7 @@ class _CurrentJobCard extends StatelessWidget {
                           textStyle: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
-                        child: Text(localizations.text('complete')),
+                        child: Text(localizations.text(job.actionKey)),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -542,46 +588,38 @@ class _CurrentJobCard extends StatelessWidget {
 }
 
 class _CurrentJobsSlider extends StatelessWidget {
-  const _CurrentJobsSlider({required this.localizations});
+  const _CurrentJobsSlider({required this.localizations, required this.jobs});
 
   final AppLocalizations localizations;
-
-  static const _jobs = [
-    _CurrentJobVm(
-      jobId: 'job-1',
-      category: 'Santehnik',
-      title: 'Suw akmasyny\ndüzetmek',
-      price: 180,
-    ),
-    _CurrentJobVm(
-      jobId: 'job-2',
-      category: 'Elektrik',
-      title: 'Rozetka\nçalyşmak',
-      price: 220,
-    ),
-    _CurrentJobVm(
-      jobId: 'job-3',
-      category: 'Ussa',
-      title: 'Gapy gulpuny\nbejeriş',
-      price: 150,
-    ),
-  ];
+  final List<JobListItem> jobs;
 
   @override
   Widget build(BuildContext context) {
+    if (jobs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return SizedBox(
       height: 420,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: _jobs.length,
+        itemCount: jobs.length,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
+          final job = jobs[index];
           final width = MediaQuery.sizeOf(context).width - 44;
           return SizedBox(
             width: width.clamp(280.0, 420.0),
             child: _CurrentJobCard(
               localizations: localizations,
-              job: _jobs[index],
+              job: _CurrentJobVm(
+                jobId: job.id,
+                category: job.category,
+                title: job.title,
+                priceText: job.priceText,
+                address: job.address,
+                actionKey: job.actionKey,
+              ),
             ),
           );
         },
@@ -595,13 +633,17 @@ class _CurrentJobVm {
     required this.jobId,
     required this.category,
     required this.title,
-    required this.price,
+    required this.priceText,
+    required this.address,
+    required this.actionKey,
   });
 
   final String jobId;
   final String category;
   final String title;
-  final int price;
+  final String priceText;
+  final String address;
+  final String actionKey;
 }
 
 class _MapPreview extends StatelessWidget {
@@ -624,14 +666,7 @@ class _MapPreview extends StatelessWidget {
                     initialCenter: LatLng(37.938, 58.385),
                     initialZoom: 13.2,
                   ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-                      subdomains: ['a', 'b', 'c', 'd'],
-                      userAgentPackageName: 'com.example.master_service',
-                    ),
-                  ],
+                  children: [const AppMapTileLayer()],
                 ),
               ),
             ),
@@ -754,7 +789,9 @@ class _CategoryPill extends StatelessWidget {
 }
 
 class _LocationCard extends StatelessWidget {
-  const _LocationCard();
+  const _LocationCard({required this.address});
+
+  final String address;
 
   @override
   Widget build(BuildContext context) {
@@ -764,31 +801,18 @@ class _LocationCard extends StatelessWidget {
         color: const Color(0xFFF0F5F6),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.location_on_outlined,
             color: MasterHomeScreen._brandColor,
             size: 24,
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '4.2 km (8 min)',
-                  style: TextStyle(
-                    color: Color(0xFF11191C),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Aşgabat ş., Parahat 4, 12-nji jaý',
-                  style: TextStyle(color: Color(0xFF536167), fontSize: 12),
-                ),
-              ],
+            child: Text(
+              address,
+              style: const TextStyle(color: Color(0xFF536167), fontSize: 12),
             ),
           ),
         ],
@@ -798,9 +822,10 @@ class _LocationCard extends StatelessWidget {
 }
 
 class _NewOrderCard extends StatelessWidget {
-  const _NewOrderCard({required this.localizations});
+  const _NewOrderCard({required this.localizations, required this.job});
 
   final AppLocalizations localizations;
+  final JobListItem job;
 
   @override
   Widget build(BuildContext context) {
@@ -825,21 +850,24 @@ class _NewOrderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rozetka we lentalar',
-                      style: TextStyle(
+                      job.title,
+                      style: const TextStyle(
                         color: Color(0xFF101719),
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    SizedBox(height: 3),
+                    const SizedBox(height: 3),
                     Text(
-                      'Elektrik • 2.5 km uzaklykda',
-                      style: TextStyle(color: Color(0xFF536167), fontSize: 12),
+                      '${job.category} • ${job.address}',
+                      style: const TextStyle(
+                        color: Color(0xFF536167),
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -868,17 +896,17 @@ class _NewOrderCard extends StatelessWidget {
           const SizedBox(height: 14),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  '250 TMT',
-                  style: TextStyle(
+                  job.priceText,
+                  style: const TextStyle(
                     color: MasterHomeScreen._brandColor,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               FilledButton(
-                onPressed: () {},
+                onPressed: () => context.go(AppRoutes.jobDetailsPath(job.id)),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF63D5DA),
                   foregroundColor: const Color(0xFF083237),
@@ -891,7 +919,7 @@ class _NewOrderCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  localizations.text('accept'),
+                  localizations.text(job.actionKey),
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     color: Colors.white,

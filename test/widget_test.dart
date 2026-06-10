@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:master_service/app/di/app_repositories.dart';
 import 'package:master_service/app/master_app.dart';
 import 'package:master_service/features/auth/application/auth_cubit.dart';
 import 'package:master_service/features/auth/domain/auth_repository.dart';
+import 'package:master_service/features/map/application/location_tracker.dart';
 
 class _TestAuthRepository implements AuthRepository {
   @override
@@ -30,17 +32,35 @@ class _TestAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  Future<void> clearLocalSession() async {}
 }
 
 void main() {
   testWidgets('shows phone login after session restore fails', (tester) async {
+    final repositories = AppRepositories.create();
+    final authCubit = AuthCubit(_TestAuthRepository());
+    final locationTracker = LocationTracker(
+      locationRepository: repositories.locationRepository,
+      tokenStorage: repositories.tokenStorage,
+      activeOrderHolder: repositories.activeOrderHolder,
+    );
+
     await tester.pumpWidget(
-      MasterApp(authCubit: AuthCubit(_TestAuthRepository())),
+      MasterApp(
+        authCubit: authCubit,
+        repositories: repositories,
+        locationTracker: locationTracker,
+      ),
     );
 
     await tester.pumpAndSettle();
 
     expect(find.text('Hoş geldiňiz!'), findsOneWidget);
     expect(find.text('Usta hyzmaty'), findsOneWidget);
+
+    locationTracker.dispose();
+    authCubit.close();
   });
 }

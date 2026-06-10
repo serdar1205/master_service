@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/app_status.dart';
+import '../../../../app/di/app_repositories.dart';
+import '../../../../app/widgets/app_map_tile_layer.dart';
 import '../../application/map_cubit.dart';
 import '../../data/local_map_repository.dart';
 
@@ -21,8 +21,10 @@ class MapScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
 
+    final repositories = AppRepositoriesScope.of(context);
+
     return BlocProvider(
-      create: (_) => MapCubit(const LocalMapRepository())..load(),
+      create: (_) => MapCubit(repositories.ordersRepository)..load(),
       child: Scaffold(
         body: Stack(
           children: [
@@ -66,10 +68,32 @@ class MapScreen extends StatelessWidget {
   }
 }
 
-class _ServiceMap extends StatelessWidget {
+class _ServiceMap extends StatefulWidget {
   const _ServiceMap({required this.localizations});
 
   final AppLocalizations localizations;
+
+  @override
+  State<_ServiceMap> createState() => _ServiceMapState();
+}
+
+class _ServiceMapState extends State<_ServiceMap> {
+  bool _tilesUnavailable = false;
+  int _mapRebuildKey = 0;
+
+  void _onTileError(TileImage tile, Object error, StackTrace? stackTrace) {
+    if (_tilesUnavailable || !mounted) {
+      return;
+    }
+    setState(() => _tilesUnavailable = true);
+  }
+
+  void _retryTiles() {
+    setState(() {
+      _tilesUnavailable = false;
+      _mapRebuildKey++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,60 +112,53 @@ class _ServiceMap extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return FlutterMap(
-          options: MapOptions(
-            initialCenter: data.center,
-            initialZoom: 13.2,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom,
-            ),
-          ),
+        return Stack(
           children: [
-            TileLayer(
-              urlTemplate:
-                  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-              subdomains: const ['a', 'b', 'c', 'd'],
-              userAgentPackageName: 'com.example.master_service',
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: const LatLng(37.9438, 58.362),
-                  width: 138,
-                  height: 48,
-                  child: _JobMapMarker(
-                    icon: Icons.bolt,
-                    label: localizations.text('newRequest'),
-                  ),
+            FlutterMap(
+              key: ValueKey(_mapRebuildKey),
+              options: MapOptions(
+                initialCenter: data.center,
+                initialZoom: 13.2,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom,
                 ),
-                Marker(
-                  point: const LatLng(37.935, 58.397),
-                  width: 138,
-                  height: 48,
-                  child: _JobMapMarker(
-                    icon: Icons.cleaning_services_outlined,
-                    label: localizations.text('newRequest'),
-                  ),
-                ),
-                Marker(
-                  point: const LatLng(37.925, 58.416),
-                  width: 138,
-                  height: 48,
-                  child: _JobMapMarker(
-                    icon: Icons.handyman_outlined,
-                    label: localizations.text('newRequest'),
-                  ),
-                ),
-                Marker(
-                  point: data.center,
-                  width: 132,
-                  height: 108,
-                  child: _CurrentLocationMarker(
-                    label: localizations.text('yourLocation'),
-                  ),
+              ),
+              children: [
+                AppMapTileLayer(onTileError: _onTileError),
+                MarkerLayer(
+                  markers: [
+                    for (final marker in data.markers)
+                      Marker(
+                        point: marker.point,
+                        width: 138,
+                        height: 48,
+                        child: _JobMapMarker(
+                          icon: _materialIcon(marker.iconCode),
+                          label: marker.labelKey,
+                        ),
+                      ),
+                    Marker(
+                      point: data.center,
+                      width: 132,
+                      height: 108,
+                      child: _CurrentLocationMarker(
+                        label: widget.localizations.text('yourLocation'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
+            if (_tilesUnavailable)
+              Positioned(
+                top: MediaQuery.paddingOf(context).top + 12,
+                left: 16,
+                right: 16,
+                child: AppMapTileErrorBanner(
+                  message: widget.localizations.text('mapTilesError'),
+                  onRetry: _retryTiles,
+                ),
+              ),
           ],
         );
       },
@@ -371,7 +388,7 @@ class _MapOrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      localizations.text(offer.titleKey),
+                      offer.titleKey,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: const Color(0xFF172025),
                         fontWeight: FontWeight.w500,
@@ -387,10 +404,12 @@ class _MapOrderCard extends StatelessWidget {
                           size: 18,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          localizations.text(offer.distanceKey),
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: const Color(0xFF66767D)),
+                        Expanded(
+                          child: Text(
+                            offer.distanceKey,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: const Color(0xFF66767D)),
+                          ),
                         ),
                       ],
                     ),
@@ -463,4 +482,3 @@ class _MapOrderCard extends StatelessWidget {
     );
   }
 }
-

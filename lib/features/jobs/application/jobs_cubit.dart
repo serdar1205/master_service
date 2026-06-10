@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_status.dart';
-import '../data/local_jobs_repository.dart';
+import '../domain/order_models.dart';
+import '../domain/orders_repository.dart';
 
 class JobsState {
   const JobsState({required this.status, this.data, this.errorMessage});
@@ -29,20 +31,45 @@ class JobsState {
 class JobsCubit extends Cubit<JobsState> {
   JobsCubit(this._repository) : super(const JobsState.initial());
 
-  final LocalJobsRepository _repository;
+  final OrdersRepository _repository;
 
   Future<void> load() async {
     emit(state.copyWith(status: AppStatus.loading, clearError: true));
     try {
       final data = await _repository.fetchDashboard();
       emit(state.copyWith(status: AppStatus.success, data: data));
-    } on Object {
+    } on Object catch (error) {
       emit(
         state.copyWith(
           status: AppStatus.failure,
-          errorMessage: 'Sargytlar ýüklenip bilinmedi.',
+          errorMessage: _friendlyError(error, 'Sargytlar ýüklenip bilinmedi.'),
         ),
       );
     }
+  }
+
+  Future<bool> startOrder(String orderId) async {
+    emit(state.copyWith(status: AppStatus.loading, clearError: true));
+    try {
+      await _repository.startOrder(orderId);
+      final data = await _repository.fetchDashboard();
+      emit(state.copyWith(status: AppStatus.success, data: data));
+      return true;
+    } on Object catch (error) {
+      emit(
+        state.copyWith(
+          status: AppStatus.failure,
+          errorMessage: _friendlyError(error, 'Sargyt başlap bolmady.'),
+        ),
+      );
+      return false;
+    }
+  }
+
+  String _friendlyError(Object error, String fallback) {
+    if (error is ApiException) {
+      return error.message;
+    }
+    return fallback;
   }
 }
