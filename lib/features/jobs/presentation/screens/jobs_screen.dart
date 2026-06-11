@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/locale_badge.dart';
+import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
@@ -36,136 +39,163 @@ class JobsScreen extends StatelessWidget {
         );
         return cubit;
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF4FBFB),
-        body: SafeArea(
-          child: Column(
-            children: [
-              _OrdersHeader(localizations: localizations),
-              Expanded(
-                child: BlocBuilder<JobsCubit, JobsState>(
-                  builder: (context, state) {
-                    if (state.status == AppStatus.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+      child: Builder(
+        builder: (context) {
+          return LocaleChangeListener(
+            onLocaleChanged: () {
+              final cubit = context.read<JobsCubit>();
+              unawaited(
+                cubit.load().then((_) {
+                  repositories.activeOrderHolder.updateFromDashboard(
+                    cubit.state.data,
+                  );
+                }),
+              );
+            },
+            child: Scaffold(
+              backgroundColor: const Color(0xFFF4FBFB),
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    _OrdersHeader(localizations: localizations),
+                    Expanded(
+                      child: BlocBuilder<JobsCubit, JobsState>(
+                        builder: (context, state) {
+                          if (state.status == AppStatus.loading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
 
-                    if (state.status == AppStatus.failure) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Text(state.errorMessage ?? ''),
-                        ),
-                      );
-                    }
+                          if (state.status == AppStatus.failure) {
+                            return AppErrorView(
+                              message: state.errorMessage ??
+                                  localizations.text('errorDefaultMessage'),
+                              onRetry: () => context.read<JobsCubit>().load(),
+                            );
+                          }
 
-                    final data = state.data;
-                    if (data == null) {
-                      return const SizedBox.shrink();
-                    }
+                          final data = state.data;
+                          if (data == null) {
+                            return const SizedBox.shrink();
+                          }
 
-                    return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                      children: [
-                        Text(
-                          localizations.text('myJobsTitle'),
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(
-                                color: const Color(0xFF101719),
-                                fontWeight: FontWeight.w900,
+                          return ListView(
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                            children: [
+                              Text(
+                                localizations.text('myJobsTitle'),
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(
+                                      color: const Color(0xFF101719),
+                                      fontWeight: FontWeight.w900,
+                                    ),
                               ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          localizations.text('myJobsSubtitle'),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: const Color(0xFF526168),
-                                fontWeight: FontWeight.w500,
+                              const SizedBox(height: 4),
+                              Text(
+                                localizations.text('myJobsSubtitle'),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: const Color(0xFF526168),
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
-                        ),
-                        const SizedBox(height: 14),
-                        _StatsRow(
-                          localizations: localizations,
-                          activeCount: data.activeCount.toString(),
-                          completedCount: data.completedCount.toString(),
-                        ),
-                        const SizedBox(height: 14),
-                        for (var i = 0; i < data.activeJobs.length; i++) ...[
-                          _OrderCard(
-                            category: data.activeJobs[i].category,
-                            title: data.activeJobs[i].title,
-                            address: data.activeJobs[i].address,
-                            price: data.activeJobs[i].priceText,
-                            status: localizations.text(
-                              data.activeJobs[i].statusKey,
-                            ),
-                            actionLabel: localizations.text(
-                              data.activeJobs[i].actionKey,
-                            ),
-                            accentIcon: i == 0
-                                ? Icons.electrical_services
-                                : i == 1
-                                ? Icons.plumbing
-                                : Icons.air,
-                            photoColor: i == 0
-                                ? const Color(0xFF94A69A)
-                                : i == 1
-                                ? const Color(0xFF8FBEC1)
-                                : const Color(0xFFAFC8C3),
-                            secondaryIcon: i == 1
-                                ? Icons.chat_bubble_outline
-                                : Icons.phone_outlined,
-                            outlinedPrimary:
-                                data.activeJobs[i].isOutlinedAction,
-                            onPrimaryAction: () async {
-                              final job = data.activeJobs[i];
-                              if (job.actionKey == 'startJob') {
-                                final cubit = context.read<JobsCubit>();
-                                final started = await cubit.startOrder(job.id);
-                                if (started && context.mounted) {
-                                  repositories.activeOrderHolder
-                                      .updateFromDashboard(cubit.state.data);
-                                }
-                                return;
-                              }
-                              if (context.mounted) {
-                                context.go(AppRoutes.jobDetailsPath(job.id));
-                              }
-                            },
-                            onSecondaryAction: () {},
-                          ),
-                          if (i != data.activeJobs.length - 1)
-                            const SizedBox(height: 14),
-                        ],
-                        const SizedBox(height: 24),
-                        Text(
-                          localizations.text('ordersHistory'),
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                color: const Color(0xFF101719),
-                                fontWeight: FontWeight.w900,
+                              const SizedBox(height: 14),
+                              _StatsRow(
+                                localizations: localizations,
+                                activeCount: data.activeCount.toString(),
+                                completedCount: data.completedCount.toString(),
                               ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          localizations.text('completedOrdersSubtitle'),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: const Color(0xFF526168)),
-                        ),
-                        const SizedBox(height: 14),
-                        if (data.historyJobs.isNotEmpty)
-                          _HistoryCard(
-                            localizations: localizations,
-                            job: data.historyJobs.first,
-                          ),
-                      ],
-                    );
-                  },
+                              const SizedBox(height: 14),
+                              for (
+                                var i = 0;
+                                i < data.activeJobs.length;
+                                i++
+                              ) ...[
+                                _OrderCard(
+                                  category: data.activeJobs[i].category,
+                                  title: data.activeJobs[i].title,
+                                  address: data.activeJobs[i].address,
+                                  price: data.activeJobs[i].priceText,
+                                  status: localizations.text(
+                                    data.activeJobs[i].statusKey,
+                                  ),
+                                  actionLabel: localizations.text(
+                                    data.activeJobs[i].actionKey,
+                                  ),
+                                  accentIcon: i == 0
+                                      ? Icons.electrical_services
+                                      : i == 1
+                                      ? Icons.plumbing
+                                      : Icons.air,
+                                  photoColor: i == 0
+                                      ? const Color(0xFF94A69A)
+                                      : i == 1
+                                      ? const Color(0xFF8FBEC1)
+                                      : const Color(0xFFAFC8C3),
+                                  secondaryIcon: i == 1
+                                      ? Icons.chat_bubble_outline
+                                      : Icons.phone_outlined,
+                                  outlinedPrimary:
+                                      data.activeJobs[i].isOutlinedAction,
+                                  onPrimaryAction: () async {
+                                    final job = data.activeJobs[i];
+                                    if (job.actionKey == 'startJob') {
+                                      final cubit = context.read<JobsCubit>();
+                                      final started = await cubit.startOrder(
+                                        job.id,
+                                      );
+                                      if (started && context.mounted) {
+                                        repositories.activeOrderHolder
+                                            .updateFromDashboard(
+                                              cubit.state.data,
+                                            );
+                                      }
+                                      return;
+                                    }
+                                    if (context.mounted) {
+                                      context.go(
+                                        AppRoutes.jobDetailsPath(job.id),
+                                      );
+                                    }
+                                  },
+                                  onSecondaryAction: () {},
+                                ),
+                                if (i != data.activeJobs.length - 1)
+                                  const SizedBox(height: 14),
+                              ],
+                              const SizedBox(height: 24),
+                              Text(
+                                localizations.text('ordersHistory'),
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: const Color(0xFF101719),
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                localizations.text('completedOrdersSubtitle'),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: const Color(0xFF526168)),
+                              ),
+                              const SizedBox(height: 14),
+                              if (data.historyJobs.isNotEmpty)
+                                _HistoryCard(
+                                  localizations: localizations,
+                                  job: data.historyJobs.first,
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -208,13 +238,7 @@ class _OrdersHeader extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            'RU/TM',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: const Color(0xFF4E5B61),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          const LocaleBadge(brandColor: JobsScreen._brandColor),
         ],
       ),
     );

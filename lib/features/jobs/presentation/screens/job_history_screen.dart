@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
+import '../../../../app/widgets/app_error_view.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../domain/order_models.dart';
 import '../../domain/orders_repository.dart';
@@ -28,7 +29,11 @@ class JobHistoryScreen extends StatelessWidget {
             }
 
             if (state.status == AppStatus.failure) {
-              return Center(child: Text(state.errorMessage ?? ''));
+              return AppErrorView(
+                message: state.errorMessage ??
+                    localizations.text('errorDefaultMessage'),
+                onRetry: () => context.read<_HistoryCubit>().load(),
+              );
             }
 
             final jobs = state.jobs;

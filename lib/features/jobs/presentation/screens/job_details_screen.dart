@@ -7,9 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/localization/locale_cubit.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
+import '../../../../app/widgets/app_error_view.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../application/job_details_cubit.dart';
 
@@ -45,7 +48,13 @@ class JobDetailsScreen extends StatelessWidget {
                     }
 
                     if (state.status == AppStatus.failure) {
-                      return Center(child: Text(state.errorMessage ?? ''));
+                      return AppErrorView(
+                        message: state.errorMessage ??
+                            localizations.text('errorDefaultMessage'),
+                        onRetry: () => context
+                            .read<JobDetailsCubit>()
+                            .load(jobId),
+                      );
                     }
 
                     final details = state.data;
@@ -167,9 +176,7 @@ class JobDetailsScreen extends StatelessWidget {
       final message = error.code == 'already_active'
           ? 'Surat saýlaýjy eýýäm açyk. Biraz garaşyň.'
           : 'Galereýany açyp bolmady.';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      AppToast.showError(message);
       return;
     } finally {
       cubit.endPhotoPick();
@@ -179,12 +186,7 @@ class JobDetailsScreen extends StatelessWidget {
       return;
     }
 
-    final uploaded = await cubit.uploadPhoto(type: type, filePath: image.path);
-    if (!uploaded && context.mounted && cubit.state.errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(cubit.state.errorMessage!)));
-    }
+    await cubit.uploadPhoto(type: type, filePath: image.path);
   }
 
   Future<void> _completeOrder(
@@ -232,15 +234,8 @@ class JobDetailsScreen extends StatelessWidget {
       return;
     }
 
-    if (completed) {
+    if (completed && context.mounted) {
       context.go(AppRoutes.jobs);
-      return;
-    }
-
-    if (cubit.state.errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(cubit.state.errorMessage!)));
     }
   }
 }
@@ -302,12 +297,20 @@ class _DetailsHeader extends StatelessWidget {
                   size: 15,
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  'RU/TM',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: const Color(0xFF5D686E),
-                    fontWeight: FontWeight.w700,
-                  ),
+                BlocBuilder<LocaleCubit, LocaleState>(
+                  builder: (context, state) {
+                    final label = state.locale.languageCode == 'ru'
+                        ? 'RU'
+                        : 'TM';
+
+                    return Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: const Color(0xFF5D686E),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

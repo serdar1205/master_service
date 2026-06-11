@@ -30,7 +30,7 @@ void main() {
   test('TurkmenPhoneTextInputFormatter limits to 8 digits', () {
     const formatter = TurkmenPhoneTextInputFormatter();
     final result = formatter.formatEditUpdate(
-      const TextEditingValue.empty(),
+      const TextEditingValue(text: ''),
       const TextEditingValue(text: '621112223344'),
     );
 

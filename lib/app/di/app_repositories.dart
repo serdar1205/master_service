@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../core/network/api_client.dart';
+import '../../core/network/api_locale_holder.dart';
 import '../../core/storage/secure_token_storage.dart';
 import '../../features/auth/data/auth_repository_impl.dart';
 import '../../features/auth/domain/auth_repository.dart';
@@ -25,7 +26,11 @@ class AppRepositories {
 
   factory AppRepositories.create() {
     final tokenStorage = SecureTokenStorage();
-    final apiClient = ApiClient(tokenStorage: tokenStorage);
+    final localeHolder = ApiLocaleHolder();
+    final apiClient = ApiClient(
+      tokenStorage: tokenStorage,
+      localeHolder: localeHolder,
+    );
     final activeOrderHolder = ActiveOrderHolder();
 
     return AppRepositories(

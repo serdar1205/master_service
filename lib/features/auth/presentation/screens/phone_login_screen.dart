@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/locale_badge.dart';
 import '../../../../core/widgets/turkmen_phone_field.dart';
 import '../../application/auth_cubit.dart';
 
@@ -112,13 +113,7 @@ class _AuthHeader extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            'RU/TM',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: const Color(0xFF536065),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+          LocaleBadge(brandColor: brandColor),
         ],
       ),
     );

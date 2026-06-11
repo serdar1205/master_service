@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:master_service/app/di/app_repositories.dart';
+import 'package:master_service/app/localization/locale_cubit.dart';
 import 'package:master_service/app/master_app.dart';
+import 'package:master_service/core/storage/app_locale_storage.dart';
 import 'package:master_service/features/auth/application/auth_cubit.dart';
 import 'package:master_service/features/auth/domain/auth_repository.dart';
 import 'package:master_service/features/map/application/location_tracker.dart';
@@ -40,6 +42,10 @@ class _TestAuthRepository implements AuthRepository {
 void main() {
   testWidgets('shows phone login after session restore fails', (tester) async {
     final repositories = AppRepositories.create();
+    final localeCubit = LocaleCubit(
+      storage: AppLocaleStorage(),
+      apiLocaleHolder: repositories.apiClient.localeHolder,
+    );
     final authCubit = AuthCubit(_TestAuthRepository());
     final locationTracker = LocationTracker(
       locationRepository: repositories.locationRepository,
@@ -50,6 +56,7 @@ void main() {
     await tester.pumpWidget(
       MasterApp(
         authCubit: authCubit,
+        localeCubit: localeCubit,
         repositories: repositories,
         locationTracker: locationTracker,
       ),
@@ -61,6 +68,7 @@ void main() {
     expect(find.text('Usta hyzmaty'), findsOneWidget);
 
     locationTracker.dispose();
-    authCubit.close();
+    await localeCubit.close();
+    await authCubit.close();
   });
 }

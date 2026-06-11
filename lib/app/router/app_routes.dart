@@ -13,6 +13,7 @@ class AppRoutes {
   static const settings = '/settings';
   static const editProfile = '/profile/edit';
   static const accountSettings = '/settings/account';
+  static const languageSettings = '/settings/language';
   static const paymentHistory = '/settings/payments';
   static const supportCenter = '/settings/support';
 

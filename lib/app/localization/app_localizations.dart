@@ -105,6 +105,15 @@ class AppLocalizations {
       'accountSettingsTitle': 'Hasap sazlamalary',
       'pushNotifications': 'Bildirişleri kabul et',
       'language': 'Dil',
+      'languageSettingsTitle': 'Dil saýlamak',
+      'languageSettingsSubtitle':
+          'Programmanyň dilini saýlaň. API habarlar hem şu dilde gelýär.',
+      'languageTurkmen': 'Türkmençe',
+      'languageTurkmenSubtitle': 'Türkmen dili',
+      'languageRussian': 'Русский',
+      'languageRussianSubtitle': 'Русский язык',
+      'languageChanged': 'Dil üstünlikli üýtgedildi.',
+      'currentLanguage': 'Häzirki dil',
       'privacySecurity': 'Gizlinlik we howpsuzlyk',
       'faq': 'Köp soralýan soraglar',
       'chatWithSupport': 'Goldaw bilen ýazglaş',
@@ -117,6 +126,14 @@ class AppLocalizations {
       'signOutConfirmMessage':
           'Hakykatdanam hasabyňyzdan çykmak isleýärsiňizmi?',
       'cancel': 'Ýatyr',
+      'errorTitle': 'Bir zat nädogry boldy',
+      'errorDefaultMessage':
+          'Maglumat ýüklenip bilinmedi. Internet baglanyşygyny barlaň we täzeden synanyşyň.',
+      'retryAction': 'Täzeden synanyş',
+      'goHomeAction': 'Baş sahypa',
+      'navigationErrorTitle': 'Sahypa açylp bilinmedi',
+      'navigationErrorMessage':
+          'Bu bölüm elýeterli däl. Baş sahypa gaýdyp synanyşyň.',
       'placeholder': 'Bu bölüm API şertnamasy taýýar bolanda ösdüriler.',
     },
     'ru': {
@@ -207,6 +224,15 @@ class AppLocalizations {
       'accountSettingsTitle': 'Настройки аккаунта',
       'pushNotifications': 'Push-уведомления',
       'language': 'Язык',
+      'languageSettingsTitle': 'Выбор языка',
+      'languageSettingsSubtitle':
+          'Выберите язык приложения. Сообщения API также будут на этом языке.',
+      'languageTurkmen': 'Türkmençe',
+      'languageTurkmenSubtitle': 'Türkmen dili',
+      'languageRussian': 'Русский',
+      'languageRussianSubtitle': 'Русский язык',
+      'languageChanged': 'Язык успешно изменён.',
+      'currentLanguage': 'Текущий язык',
       'privacySecurity': 'Приватность и безопасность',
       'faq': 'Частые вопросы',
       'chatWithSupport': 'Чат с поддержкой',
@@ -218,6 +244,14 @@ class AppLocalizations {
       'signOutConfirmTitle': 'Выйти из аккаунта?',
       'signOutConfirmMessage': 'Вы уверены, что хотите выйти?',
       'cancel': 'Отмена',
+      'errorTitle': 'Что-то пошло не так',
+      'errorDefaultMessage':
+          'Не удалось загрузить данные. Проверьте интернет и попробуйте снова.',
+      'retryAction': 'Повторить',
+      'goHomeAction': 'На главную',
+      'navigationErrorTitle': 'Не удалось открыть страницу',
+      'navigationErrorMessage':
+          'Этот раздел недоступен. Вернитесь на главную и попробуйте снова.',
       'placeholder': 'Раздел будет развит после готовности API-контракта.',
     },
   };
@@ -226,6 +260,12 @@ class AppLocalizations {
     return _localizedValues[locale.languageCode]?[key] ??
         _localizedValues['tk']![key] ??
         key;
+  }
+
+  String languageLabelFor(String languageCode) {
+    return languageCode == 'ru'
+        ? text('languageRussian')
+        : text('languageTurkmen');
   }
 
   String homeGreetingFor(String? fullName) {

@@ -108,7 +108,7 @@ class AuthCubit extends Cubit<AuthState> {
     } on Object catch (error) {
       emit(
         state.copyWith(
-          status: AuthStatus.failure,
+          status: AuthStatus.unauthenticated,
           errorMessage: _friendlyAuthError(error),
         ),
       );
@@ -144,7 +144,7 @@ class AuthCubit extends Cubit<AuthState> {
     } on Object catch (error) {
       emit(
         state.copyWith(
-          status: AuthStatus.failure,
+          status: AuthStatus.otpRequested,
           errorMessage: _friendlyAuthError(error),
         ),
       );
@@ -203,12 +203,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     if (error is ApiException) {
-      return switch (error.statusCode) {
-        404 => 'Phone number is not registered.',
-        403 => 'This account is disabled.',
-        422 => 'Invalid or expired OTP code.',
-        _ => error.message,
-      };
+      return error.message;
     }
 
     return 'We could not complete authentication. Please try again.';

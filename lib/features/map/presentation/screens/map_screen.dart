@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../../../app/widgets/app_map_tile_layer.dart';
@@ -25,44 +27,53 @@ class MapScreen extends StatelessWidget {
 
     return BlocProvider(
       create: (_) => MapCubit(repositories.ordersRepository)..load(),
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Positioned.fill(child: _ServiceMap(localizations: localizations)),
-            const Positioned(
-              right: 18,
-              top: 124,
-              child: _MapControl(icon: Icons.my_location),
-            ),
-            const Positioned(
-              right: 18,
-              top: 188,
-              child: _MapControl(icon: Icons.layers_outlined),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 76,
-              child: BlocBuilder<MapCubit, MapState>(
-                builder: (context, state) {
-                  if (state.status != AppStatus.success) {
-                    return const SizedBox.shrink();
-                  }
+      child: Builder(
+        builder: (context) {
+          return LocaleChangeListener(
+            onLocaleChanged: () => context.read<MapCubit>().load(),
+            child: Scaffold(
+              body: Stack(
+                children: [
+                  Positioned.fill(
+                    child: _ServiceMap(localizations: localizations),
+                  ),
+                  const Positioned(
+                    right: 18,
+                    top: 124,
+                    child: _MapControl(icon: Icons.my_location),
+                  ),
+                  const Positioned(
+                    right: 18,
+                    top: 188,
+                    child: _MapControl(icon: Icons.layers_outlined),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 76,
+                    child: BlocBuilder<MapCubit, MapState>(
+                      builder: (context, state) {
+                        if (state.status != AppStatus.success) {
+                          return const SizedBox.shrink();
+                        }
 
-                  final offers = state.data?.offers ?? const [];
-                  if (offers.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
+                        final offers = state.data?.offers ?? const [];
+                        if (offers.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
 
-                  return _MapOffersSlider(
-                    localizations: localizations,
-                    offers: offers,
-                  );
-                },
+                        return _MapOffersSlider(
+                          localizations: localizations,
+                          offers: offers,
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -104,7 +115,11 @@ class _ServiceMapState extends State<_ServiceMap> {
         }
 
         if (state.status == AppStatus.failure) {
-          return Center(child: Text(state.errorMessage ?? ''));
+          return AppErrorView(
+            message: state.errorMessage ??
+                widget.localizations.text('errorDefaultMessage'),
+            onRetry: () => context.read<MapCubit>().load(),
+          );
         }
 
         final data = state.data;

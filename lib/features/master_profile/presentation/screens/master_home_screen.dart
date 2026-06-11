@@ -9,6 +9,8 @@ import 'dart:ui';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
@@ -42,110 +44,129 @@ class MasterHomeScreen extends StatelessWidget {
         );
         return cubit;
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF4FBFB),
-        body: BlocBuilder<HomeCubit, HomeState>(
-          builder: (context, state) {
-            if (state.status == AppStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      child: Builder(
+        builder: (context) {
+          return LocaleChangeListener(
+            onLocaleChanged: () {
+              final cubit = context.read<HomeCubit>();
+              unawaited(
+                cubit.load().then((_) {
+                  final jobs = cubit.state.data?.activeJobs ?? const [];
+                  repositories.activeOrderHolder.updateFromActiveJobs(jobs);
+                }),
+              );
+            },
+            child: Scaffold(
+              backgroundColor: const Color(0xFFF4FBFB),
+              body: BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  if (state.status == AppStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            if (state.status == AppStatus.failure) {
-              return Center(child: Text(state.errorMessage ?? ''));
-            }
+                  if (state.status == AppStatus.failure) {
+                    return AppErrorView(
+                      message: state.errorMessage ??
+                          localizations.text('errorDefaultMessage'),
+                      onRetry: () => context.read<HomeCubit>().load(),
+                    );
+                  }
 
-            final data = state.data;
-            if (data == null) {
-              return const SizedBox.shrink();
-            }
+                  final data = state.data;
+                  if (data == null) {
+                    return const SizedBox.shrink();
+                  }
 
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  elevation: 0,
-                  scrolledUnderElevation: 0,
-                  shadowColor: Colors.transparent,
-                  surfaceTintColor: Colors.transparent,
-                  forceMaterialTransparency: true,
-                  expandedHeight: 132,
-                  toolbarHeight: 58,
-                  automaticallyImplyLeading: false,
-                  titleSpacing: 0,
-                  // Paint the image as the AppBar's own background so it shows when collapsed
-                  backgroundColor: Colors.transparent,
-                  title: const SizedBox.shrink(),
-                  flexibleSpace: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Always-visible image — covers both collapsed and expanded states
-                      const DecoratedBox(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/image/header.png'),
-                            fit: BoxFit.cover,
-                          ),
+                  return CustomScrollView(
+                    slivers: [
+                      SliverAppBar(
+                        pinned: true,
+                        elevation: 0,
+                        scrolledUnderElevation: 0,
+                        shadowColor: Colors.transparent,
+                        surfaceTintColor: Colors.transparent,
+                        forceMaterialTransparency: true,
+                        expandedHeight: 132,
+                        toolbarHeight: 58,
+                        automaticallyImplyLeading: false,
+                        titleSpacing: 0,
+                        // Paint the image as the AppBar's own background so it shows when collapsed
+                        backgroundColor: Colors.transparent,
+                        title: const SizedBox.shrink(),
+                        flexibleSpace: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Always-visible image — covers both collapsed and expanded states
+                            const DecoratedBox(
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage('assets/image/header.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            // Animated overlay on top
+                            FlexibleSpaceBar(
+                              collapseMode: CollapseMode.parallax,
+                              background: _AnimatedHomeHeader(
+                                localizations: localizations,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      // Animated overlay on top
-                      FlexibleSpaceBar(
-                        collapseMode: CollapseMode.parallax,
-                        background: _AnimatedHomeHeader(
-                          localizations: localizations,
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            _Greeting(
+                              localizations: localizations,
+                              masterName: data.masterName,
+                            ),
+                            const SizedBox(height: 18),
+                            _StatsRow(
+                              localizations: localizations,
+                              activeCount: data.stats[0].value,
+                              completedCount: data.stats[1].value,
+                              earningsCount: data.stats[2].value,
+                            ),
+                            const SizedBox(height: 20),
+                            _SectionHeader(
+                              title: localizations.text('currentJob'),
+                              trailing: _StatusChip(
+                                label: localizations.text('started'),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _CurrentJobsSlider(
+                              localizations: localizations,
+                              jobs: data.activeJobs,
+                            ),
+                            const SizedBox(height: 20),
+                            _SectionHeader(
+                              title: localizations.text('newOrders'),
+                              trailing: TextButton(
+                                onPressed: () => context.go(AppRoutes.jobs),
+                                child: Text(localizations.text('seeAll')),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            if (data.activeJobs.isNotEmpty)
+                              _NewOrderCard(
+                                localizations: localizations,
+                                job: data.activeJobs.first,
+                              ),
+                          ]),
                         ),
                       ),
+                      SliverToBoxAdapter(child: SizedBox(height: 160)),
                     ],
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      _Greeting(
-                        localizations: localizations,
-                        masterName: data.masterName,
-                      ),
-                      const SizedBox(height: 18),
-                      _StatsRow(
-                        localizations: localizations,
-                        activeCount: data.stats[0].value,
-                        completedCount: data.stats[1].value,
-                        earningsCount: data.stats[2].value,
-                      ),
-                      const SizedBox(height: 20),
-                      _SectionHeader(
-                        title: localizations.text('currentJob'),
-                        trailing: _StatusChip(
-                          label: localizations.text('started'),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _CurrentJobsSlider(
-                        localizations: localizations,
-                        jobs: data.activeJobs,
-                      ),
-                      const SizedBox(height: 20),
-                      _SectionHeader(
-                        title: localizations.text('newOrders'),
-                        trailing: TextButton(
-                          onPressed: () => context.go(AppRoutes.jobs),
-                          child: Text(localizations.text('seeAll')),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (data.activeJobs.isNotEmpty)
-                        _NewOrderCard(
-                          localizations: localizations,
-                          job: data.activeJobs.first,
-                        ),
-                    ]),
-                  ),
-                ),
-                SliverToBoxAdapter(child: SizedBox(height: 160)),
-              ],
-            );
-          },
-        ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

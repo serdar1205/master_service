@@ -3,7 +3,7 @@ class AppConfig {
 
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.225:8000',
+    defaultValue: 'http://192.168.31.64:8000',
   );
 
   static const realtimeUrl = String.fromEnvironment(

@@ -4,17 +4,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app/di/app_repositories.dart';
+import 'app/localization/locale_cubit.dart';
 import 'app/master_app.dart';
 import 'core/config/app_config.dart';
 import 'core/logging/app_logger.dart';
+import 'core/storage/app_locale_storage.dart';
 import 'features/auth/application/auth_cubit.dart';
 import 'features/map/application/location_tracker.dart';
 
-void main() {
+Future<void> main() async {
   const logger = ConsoleAppLogger();
 
   runZonedGuarded(
-    () {
+    () async {
       WidgetsFlutterBinding.ensureInitialized();
       FlutterError.onError = (details) {
         logger.error(
@@ -36,6 +38,19 @@ void main() {
       AppConfig.validateOrThrow(isDebugMode: kDebugMode);
 
       final repositories = AppRepositories.create();
+      final localeStorage = AppLocaleStorage();
+      final savedLocaleCode = await localeStorage.readLocaleCode();
+      final deviceLocaleCode =
+          WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+      final localeCubit = LocaleCubit(
+        storage: localeStorage,
+        apiLocaleHolder: repositories.apiClient.localeHolder,
+        initialLocale: LocaleCubit.resolveInitialLocale(
+          savedLocaleCode: savedLocaleCode,
+          deviceLocaleCode: deviceLocaleCode,
+        ),
+      );
+
       final authCubit = AuthCubit(repositories.authRepository);
       repositories.apiClient.attachUnauthorizedHandler(
         authCubit.handleSessionExpired,
@@ -58,6 +73,7 @@ void main() {
       runApp(
         MasterApp(
           authCubit: authCubit,
+          localeCubit: localeCubit,
           repositories: repositories,
           locationTracker: locationTracker,
         ),

@@ -13,9 +13,11 @@ import '../../features/master_profile/presentation/screens/master_home_screen.da
 import '../../features/payments/presentation/screens/payments_screen.dart';
 import '../../features/settings/presentation/screens/account_settings_screen.dart';
 import '../../features/settings/presentation/screens/edit_profile_screen.dart';
+import '../../features/settings/presentation/screens/language_settings_screen.dart';
 import '../../features/settings/presentation/screens/payment_history_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/settings/presentation/screens/support_screen.dart';
+import '../widgets/app_error_page.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
 import 'main_shell.dart';
@@ -102,6 +104,10 @@ class AppRouter {
           builder: (context, state) => const AccountSettingsScreen(),
         ),
         GoRoute(
+          path: AppRoutes.languageSettings,
+          builder: (context, state) => const LanguageSettingsScreen(),
+        ),
+        GoRoute(
           path: AppRoutes.paymentHistory,
           builder: (context, state) => const PaymentHistoryScreen(),
         ),
@@ -110,11 +116,8 @@ class AppRouter {
           builder: (context, state) => const SupportScreen(),
         ),
       ],
-      errorBuilder: (context, state) => Scaffold(
-        appBar: AppBar(title: const Text('Master Service')),
-        body: const Center(
-          child: Text('Something went wrong. Please reopen this section.'),
-        ),
+      errorBuilder: (context, state) => AppErrorPage(
+        message: state.error?.toString(),
       ),
     );
   }

@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/locale_badge.dart';
+import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../auth/application/auth_cubit.dart';
@@ -23,71 +26,86 @@ class SettingsScreen extends StatelessWidget {
 
     return BlocProvider(
       create: (_) => ProfileCubit(repositories.profileRepository)..load(),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF4FBFB),
-        body: SafeArea(
-          child: Column(
-            children: [
-              _ProfileHeader(localizations: localizations),
-              Expanded(
-                child: BlocBuilder<ProfileCubit, ProfileState>(
-                  builder: (context, state) {
-                    if (state.status == AppStatus.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+      child: Builder(
+        builder: (context) {
+          return LocaleChangeListener(
+            onLocaleChanged: () => context.read<ProfileCubit>().load(),
+            child: Scaffold(
+              backgroundColor: const Color(0xFFF4FBFB),
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    _ProfileHeader(localizations: localizations),
+                    Expanded(
+                      child: BlocBuilder<ProfileCubit, ProfileState>(
+                        builder: (context, state) {
+                          if (state.status == AppStatus.loading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
 
-                    if (state.status == AppStatus.failure) {
-                      return Center(child: Text(state.errorMessage ?? ''));
-                    }
+                          if (state.status == AppStatus.failure) {
+                            return AppErrorView(
+                              message: state.errorMessage ??
+                                  localizations.text('errorDefaultMessage'),
+                              onRetry: () =>
+                                  context.read<ProfileCubit>().load(),
+                            );
+                          }
 
-                    final profile = state.data;
-                    if (profile == null) {
-                      return const SizedBox.shrink();
-                    }
+                          final profile = state.data;
+                          if (profile == null) {
+                            return const SizedBox.shrink();
+                          }
 
-                    return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                      children: [
-                        _ProfileCard(
-                          localizations: localizations,
-                          fullName: profile.fullName,
-                          skills: profile.skills,
-                          onEditTap: () => context.push(AppRoutes.editProfile),
-                        ),
-                        const SizedBox(height: 20),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 18),
-                          child: Text(
-                            localizations.text('accountSettings'),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: const Color(0xFF9AA7AD),
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 3.2,
+                          return ListView(
+                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                            children: [
+                              _ProfileCard(
+                                localizations: localizations,
+                                fullName: profile.fullName,
+                                skills: profile.skills,
+                                onEditTap: () =>
+                                    context.push(AppRoutes.editProfile),
+                              ),
+                              const SizedBox(height: 20),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 18),
+                                child: Text(
+                                  localizations.text('accountSettings'),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: const Color(0xFF9AA7AD),
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 3.2,
+                                      ),
                                 ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _SettingsMenu(
-                          localizations: localizations,
-                          menuItemKeys: profile.menuItemKeys,
-                          onAccountTap: () =>
-                              context.push(AppRoutes.accountSettings),
-                          // onPaymentTap: () =>
-                          //     context.push(AppRoutes.paymentHistory),
-                          onSupportTap: () =>
-                              context.push(AppRoutes.supportCenter),
-                        ),
-                        const SizedBox(height: 18),
-                        _SignOutButton(localizations: localizations),
-                      ],
-                    );
-                  },
+                              ),
+                              const SizedBox(height: 16),
+                              _SettingsMenu(
+                                localizations: localizations,
+                                menuItemKeys: profile.menuItemKeys,
+                                onAccountTap: () =>
+                                    context.push(AppRoutes.accountSettings),
+                                // onPaymentTap: () =>
+                                //     context.push(AppRoutes.paymentHistory),
+                                onSupportTap: () =>
+                                    context.push(AppRoutes.supportCenter),
+                              ),
+                              const SizedBox(height: 18),
+                              _SignOutButton(localizations: localizations),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -121,20 +139,7 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F8F9),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'RU/TM',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: SettingsScreen._brandColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          const LocaleBadge(brandColor: SettingsScreen._brandColor),
         ],
       ),
     );
