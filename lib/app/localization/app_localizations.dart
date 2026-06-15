@@ -40,6 +40,8 @@ class AppLocalizations {
       'categorySetupTitle': 'Hyzmat kategoriýalary',
       'categorySetupSubtitle':
           'Bir ýa-da birnäçe hyzmat kategoriýasyny saýlaň.',
+      'categoriesMoreCount': '+{count} köpräk',
+      'showLessCategories': 'Gizle',
       'completeCategories': 'Kategoriýalary tamamla',
       'homeTitle': 'Ussa paneli',
       'homeGreeting': 'Hoş geldiňiz!',
@@ -159,6 +161,8 @@ class AppLocalizations {
       'completeProfile': 'Завершить профиль',
       'categorySetupTitle': 'Категории услуг',
       'categorySetupSubtitle': 'Выберите одну или несколько категорий услуг.',
+      'categoriesMoreCount': 'ещё {count}',
+      'showLessCategories': 'Свернуть',
       'completeCategories': 'Завершить категории',
       'homeTitle': 'Панель мастера',
       'homeGreeting': 'Добро пожаловать!',

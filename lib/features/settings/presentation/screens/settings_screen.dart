@@ -11,6 +11,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../auth/application/auth_cubit.dart';
 import '../../../../app/di/app_repositories.dart';
+import '../widgets/profile_categories_section.dart';
 import '../../application/profile_cubit.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -47,7 +48,8 @@ class SettingsScreen extends StatelessWidget {
 
                           if (state.status == AppStatus.failure) {
                             return AppErrorView(
-                              message: state.errorMessage ??
+                              message:
+                                  state.errorMessage ??
                                   localizations.text('errorDefaultMessage'),
                               onRetry: () =>
                                   context.read<ProfileCubit>().load(),
@@ -239,14 +241,10 @@ class _ProfileCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: skills
-                    .map((skill) => _SkillChip(label: skill))
-                    .toList(),
+              const SizedBox(height: 14),
+              ProfileCategoriesSection(
+                localizations: localizations,
+                categories: skills,
               ),
             ],
           ),
@@ -300,30 +298,6 @@ class _ProfileAvatar extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _SkillChip extends StatelessWidget {
-  const _SkillChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAF3FF),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: const Color(0xFF4F79A3),
-          fontWeight: FontWeight.w800,
-        ),
-      ),
     );
   }
 }
