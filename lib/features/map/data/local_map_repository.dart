@@ -2,14 +2,14 @@ import 'package:latlong2/latlong.dart';
 
 class MapMarkerItem {
   const MapMarkerItem({
+    required this.orderId,
     required this.point,
-    required this.iconCode,
-    required this.labelKey,
+    required this.clientInitial,
   });
 
+  final String orderId;
   final LatLng point;
-  final int iconCode;
-  final String labelKey;
+  final String clientInitial;
 }
 
 class MapOfferData {
@@ -19,6 +19,11 @@ class MapOfferData {
     required this.distanceKey,
     required this.priceText,
     required this.iconCode,
+    required this.category,
+    required this.statusKey,
+    required this.actionKey,
+    this.latitude,
+    this.longitude,
   });
 
   final String id;
@@ -26,16 +31,25 @@ class MapOfferData {
   final String distanceKey;
   final String priceText;
   final int iconCode;
+  final String category;
+  final String statusKey;
+  final String actionKey;
+  final double? latitude;
+  final double? longitude;
+
+  bool get hasLocation => latitude != null && longitude != null;
 }
 
 class MapData {
   const MapData({
-    required this.center,
+    required this.mapCenter,
     required this.markers,
     required this.offers,
+    this.currentLocation,
   });
 
-  final LatLng center;
+  final LatLng mapCenter;
+  final LatLng? currentLocation;
   final List<MapMarkerItem> markers;
   final List<MapOfferData> offers;
 }
@@ -44,23 +58,24 @@ class LocalMapRepository {
   const LocalMapRepository();
 
   Future<MapData> fetchMapData() async {
-    return const MapData(
-      center: LatLng(37.9415, 58.3794),
+    return MapData(
+      mapCenter: LatLng(37.9415, 58.3794),
+      currentLocation: LatLng(37.9415, 58.3794),
       markers: [
         MapMarkerItem(
+          orderId: 'map-offer-1',
           point: LatLng(37.9438, 58.362),
-          iconCode: 0xe0b7,
-          labelKey: 'newRequest',
+          clientInitial: 'A',
         ),
         MapMarkerItem(
+          orderId: 'map-offer-2',
           point: LatLng(37.935, 58.397),
-          iconCode: 0xecf8,
-          labelKey: 'newRequest',
+          clientInitial: 'G',
         ),
         MapMarkerItem(
+          orderId: 'map-offer-3',
           point: LatLng(37.925, 58.416),
-          iconCode: 0xe9d0,
-          labelKey: 'newRequest',
+          clientInitial: 'S',
         ),
       ],
       offers: [
@@ -70,6 +85,11 @@ class LocalMapRepository {
           distanceKey: 'distanceTime',
           priceText: '150\nTMT',
           iconCode: 0xe0b7,
+          category: 'Electric',
+          statusKey: 'assigned',
+          actionKey: 'startJob',
+          latitude: 37.9438,
+          longitude: 58.362,
         ),
         MapOfferData(
           id: 'map-offer-2',
@@ -77,6 +97,11 @@ class LocalMapRepository {
           distanceKey: 'distanceTime',
           priceText: '120\nTMT',
           iconCode: 0xecf8,
+          category: 'Cleaning',
+          statusKey: 'assigned',
+          actionKey: 'startJob',
+          latitude: 37.935,
+          longitude: 58.397,
         ),
         MapOfferData(
           id: 'map-offer-3',
@@ -84,6 +109,11 @@ class LocalMapRepository {
           distanceKey: 'distanceTime',
           priceText: '200\nTMT',
           iconCode: 0xe9d0,
+          category: 'Handyman',
+          statusKey: 'assigned',
+          actionKey: 'startJob',
+          latitude: 37.925,
+          longitude: 58.416,
         ),
       ],
     );

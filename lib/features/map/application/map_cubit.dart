@@ -2,10 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_status.dart';
 import '../../jobs/domain/order_models.dart';
 import '../../jobs/domain/orders_repository.dart';
+import '../application/map_marker_utils.dart';
 import '../data/local_map_repository.dart';
 
 class MapState {
@@ -31,6 +33,13 @@ class MapState {
   }
 }
 
+class _EnrichedMapJob {
+  const _EnrichedMapJob({required this.job, required this.clientName});
+
+  final JobListItem job;
+  final String clientName;
+}
+
 class MapCubit extends Cubit<MapState> {
   MapCubit(this._ordersRepository) : super(const MapState.initial());
 
@@ -40,31 +49,39 @@ class MapCubit extends Cubit<MapState> {
     emit(state.copyWith(status: AppStatus.loading, clearError: true));
     try {
       final dashboard = await _ordersRepository.fetchDashboard();
-      final jobsWithCoords = await _enrichWithCoordinates(dashboard.activeJobs);
-      final center = await _resolveCenter(jobsWithCoords);
+      final enrichedJobs = await _enrichOrders(dashboard.activeJobs);
+      final currentLocation = await _resolveCurrentLocation();
+      final mapCenter = _resolveMapCenter(enrichedJobs, currentLocation);
       final markers = <MapMarkerItem>[];
 
-      for (final job in jobsWithCoords) {
+      for (final entry in enrichedJobs) {
+        final job = entry.job;
         if (job.latitude == null || job.longitude == null) {
           continue;
         }
+
         markers.add(
           MapMarkerItem(
+            orderId: job.id,
             point: LatLng(job.latitude!, job.longitude!),
-            iconCode: 0xe0b7,
-            labelKey: job.category,
+            clientInitial: clientInitialFromName(entry.clientName),
           ),
         );
       }
 
-      final offers = jobsWithCoords
+      final offers = enrichedJobs
           .map(
-            (job) => MapOfferData(
-              id: job.id,
-              titleKey: job.title,
-              distanceKey: job.address,
-              priceText: job.priceText,
+            (entry) => MapOfferData(
+              id: entry.job.id,
+              titleKey: entry.job.title,
+              distanceKey: entry.job.address,
+              priceText: entry.job.priceText,
               iconCode: 0xe0b7,
+              category: entry.job.category,
+              statusKey: entry.job.statusKey,
+              actionKey: entry.job.actionKey,
+              latitude: entry.job.latitude,
+              longitude: entry.job.longitude,
             ),
           )
           .toList();
@@ -72,7 +89,12 @@ class MapCubit extends Cubit<MapState> {
       emit(
         state.copyWith(
           status: AppStatus.success,
-          data: MapData(center: center, markers: markers, offers: offers),
+          data: MapData(
+            mapCenter: mapCenter,
+            currentLocation: currentLocation,
+            markers: markers,
+            offers: offers,
+          ),
         ),
       );
     } on Object catch (error) {
@@ -87,50 +109,38 @@ class MapCubit extends Cubit<MapState> {
     }
   }
 
-  Future<List<JobListItem>> _enrichWithCoordinates(
-    List<JobListItem> jobs,
-  ) async {
-    final enriched = <JobListItem>[];
+  Future<List<_EnrichedMapJob>> _enrichOrders(List<JobListItem> jobs) async {
+    final enriched = <_EnrichedMapJob>[];
     for (final job in jobs) {
-      if (job.latitude != null && job.longitude != null) {
-        enriched.add(job);
-        continue;
-      }
-
       try {
         final details = await _ordersRepository.fetchOrder(job.id);
         enriched.add(
-          JobListItem(
-            id: job.id,
-            category: job.category,
-            title: job.title,
-            address: job.address,
-            priceText: job.priceText,
-            statusKey: job.statusKey,
-            actionKey: job.actionKey,
-            distanceText: job.distanceText,
-            isOutlinedAction: job.isOutlinedAction,
-            isHistory: job.isHistory,
-            latitude: details.latitude,
-            longitude: details.longitude,
+          _EnrichedMapJob(
+            clientName: details.clientName,
+            job: JobListItem(
+              id: job.id,
+              category: job.category,
+              title: job.title,
+              address: job.address,
+              priceText: job.priceText,
+              statusKey: job.statusKey,
+              actionKey: job.actionKey,
+              distanceText: job.distanceText,
+              isOutlinedAction: job.isOutlinedAction,
+              isHistory: job.isHistory,
+              latitude: details.latitude ?? job.latitude,
+              longitude: details.longitude ?? job.longitude,
+            ),
           ),
         );
       } on Object {
-        enriched.add(job);
+        enriched.add(_EnrichedMapJob(job: job, clientName: ''));
       }
     }
     return enriched;
   }
 
-  Future<LatLng> _resolveCenter(List<JobListItem> activeJobs) async {
-    for (final job in activeJobs) {
-      final lat = job.latitude;
-      final lng = job.longitude;
-      if (lat != null && lng != null) {
-        return LatLng(lat, lng);
-      }
-    }
-
+  Future<LatLng?> _resolveCurrentLocation() async {
     try {
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -147,9 +157,28 @@ class MapCubit extends Cubit<MapState> {
         return LatLng(position.latitude, position.longitude);
       }
     } on Object {
-      // Fall back to default map center when location is unavailable.
+      // Location unavailable — map still works without the marker.
     }
 
-    return const LatLng(37.9415, 58.3794);
+    return null;
+  }
+
+  LatLng _resolveMapCenter(
+    List<_EnrichedMapJob> activeJobs,
+    LatLng? currentLocation,
+  ) {
+    if (currentLocation != null) {
+      return currentLocation;
+    }
+
+    for (final entry in activeJobs) {
+      final lat = entry.job.latitude;
+      final lng = entry.job.longitude;
+      if (lat != null && lng != null) {
+        return LatLng(lat, lng);
+      }
+    }
+
+    return AppConfig.mapDefaultCenter;
   }
 }

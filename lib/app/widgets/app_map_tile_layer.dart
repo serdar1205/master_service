@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
-/// OpenStreetMap primary tiles with Carto Voyager fallback (no retina suffix).
+import '../../core/config/app_config.dart';
+
+/// Self-hosted OpenMapTiles raster tiles with OpenStreetMap fallback.
 class AppMapTileLayer extends StatelessWidget {
   const AppMapTileLayer({super.key, this.onTileError});
 
   static const userAgentPackageName = 'com.example.master_service';
 
-  static const osmUrlTemplate =
+  static const osmFallbackUrlTemplate =
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-  static const cartoFallbackUrlTemplate =
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
 
   final void Function(TileImage tile, Object error, StackTrace? stackTrace)?
   onTileError;
@@ -19,10 +18,11 @@ class AppMapTileLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TileLayer(
-      urlTemplate: osmUrlTemplate,
-      fallbackUrl: cartoFallbackUrlTemplate,
-      subdomains: const ['a', 'b', 'c', 'd'],
+      urlTemplate: AppConfig.mapTilesUrlTemplate,
+      fallbackUrl: osmFallbackUrlTemplate,
       userAgentPackageName: userAgentPackageName,
+      minZoom: AppConfig.mapMinZoom,
+      maxZoom: AppConfig.mapMaxZoom,
       errorTileCallback: onTileError,
     );
   }
