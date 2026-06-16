@@ -7,6 +7,9 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/storage/secure_token_storage.dart';
 import '../domain/location_repository.dart';
 import 'active_order_holder.dart';
+import 'location_send_policy.dart';
+
+const _minSendDistanceMeters = minLocationSendDistanceMeters;
 
 class LocationTracker {
   LocationTracker({
@@ -24,12 +27,18 @@ class LocationTracker {
   final ActiveOrderHolder _activeOrderHolder;
   final AppLogger _logger;
 
-  Timer? _timer;
+  StreamSubscription<Position>? _positionSubscription;
   bool _isSending = false;
   String? _lastServerErrorMessage;
+  Position? _lastSentPosition;
+
+  static final _locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: _minSendDistanceMeters.round(),
+  );
 
   Future<void> start() async {
-    if (_timer != null) {
+    if (_positionSubscription != null) {
       return;
     }
 
@@ -38,16 +47,23 @@ class LocationTracker {
       return;
     }
 
-    await _sendCurrentLocation();
-    _timer = Timer.periodic(
-      const Duration(seconds: 12),
-      (_) => _sendCurrentLocation(),
+    final initialPosition = await Geolocator.getCurrentPosition(
+      locationSettings: _locationSettings,
     );
+    await _sendPosition(initialPosition, force: true);
+
+    _positionSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: _locationSettings,
+        ).listen((position) {
+          unawaited(_sendPosition(position));
+        });
   }
 
   void stop() {
-    _timer?.cancel();
-    _timer = null;
+    _positionSubscription?.cancel();
+    _positionSubscription = null;
+    _lastSentPosition = null;
   }
 
   Future<bool> _ensurePermission() async {
@@ -60,8 +76,12 @@ class LocationTracker {
         permission == LocationPermission.whileInUse;
   }
 
-  Future<void> _sendCurrentLocation() async {
+  Future<void> _sendPosition(Position position, {bool force = false}) async {
     if (_isSending) {
+      return;
+    }
+
+    if (!force && !_hasMovedEnough(position)) {
       return;
     }
 
@@ -72,12 +92,6 @@ class LocationTracker {
 
     _isSending = true;
     try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
-
       await _locationRepository.sendLocation(
         masterId: masterId,
         latitude: position.latitude,
@@ -85,12 +99,24 @@ class LocationTracker {
         orderId: _activeOrderHolder.activeOrderId,
         recordedAt: DateTime.now(),
       );
+      _lastSentPosition = position;
       _lastServerErrorMessage = null;
     } on Object catch (error, stackTrace) {
       _logLocationFailure(error, stackTrace);
     } finally {
       _isSending = false;
     }
+  }
+
+  bool _hasMovedEnough(Position position) {
+    final lastSent = _lastSentPosition;
+    return hasMovedEnoughToSendLocation(
+      lastSentLatitude: lastSent?.latitude,
+      lastSentLongitude: lastSent?.longitude,
+      latitude: position.latitude,
+      longitude: position.longitude,
+      minDistanceMeters: _minSendDistanceMeters,
+    );
   }
 
   void _logLocationFailure(Object error, StackTrace stackTrace) {
