@@ -10,6 +10,8 @@ import 'active_order_holder.dart';
 import 'location_send_policy.dart';
 
 const _minSendDistanceMeters = minLocationSendDistanceMeters;
+const _positionStreamDistanceFilterMeters = 5.0;
+const _sendTimeout = Duration(seconds: 15);
 
 class LocationTracker {
   LocationTracker({
@@ -31,10 +33,13 @@ class LocationTracker {
   bool _isSending = false;
   String? _lastServerErrorMessage;
   Position? _lastSentPosition;
+  Position? _pendingPosition;
 
   static final _locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
-    distanceFilter: _minSendDistanceMeters.round(),
+    // Stream may deliver events more frequently than our "send" threshold,
+    // so we can reliably decide in-app whether to ping the server.
+    distanceFilter: _positionStreamDistanceFilterMeters.round(),
   );
 
   Future<void> start() async {
@@ -52,18 +57,21 @@ class LocationTracker {
     );
     await _sendPosition(initialPosition, force: true);
 
-    _positionSubscription =
-        Geolocator.getPositionStream(
-          locationSettings: _locationSettings,
-        ).listen((position) {
-          unawaited(_sendPosition(position));
-        });
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: _locationSettings,
+    ).listen((position) => _handlePosition(position));
+  }
+
+  void _handlePosition(Position position) {
+    // We intentionally don't await to avoid blocking the geolocator stream.
+    unawaited(_sendPosition(position));
   }
 
   void stop() {
     _positionSubscription?.cancel();
     _positionSubscription = null;
     _lastSentPosition = null;
+    _pendingPosition = null;
   }
 
   Future<bool> _ensurePermission() async {
@@ -78,6 +86,9 @@ class LocationTracker {
 
   Future<void> _sendPosition(Position position, {bool force = false}) async {
     if (_isSending) {
+      // If a ping is already in-flight, remember the latest position.
+      // We'll decide after the current request finishes.
+      _pendingPosition = position;
       return;
     }
 
@@ -92,19 +103,29 @@ class LocationTracker {
 
     _isSending = true;
     try {
-      await _locationRepository.sendLocation(
-        masterId: masterId,
-        latitude: position.latitude,
-        longitude: position.longitude,
-        orderId: _activeOrderHolder.activeOrderId,
-        recordedAt: DateTime.now(),
-      );
+      await _locationRepository
+          .sendLocation(
+            masterId: masterId,
+            latitude: position.latitude,
+            longitude: position.longitude,
+            orderId: _activeOrderHolder.activeOrderId,
+            recordedAt: DateTime.now(),
+          )
+          .timeout(_sendTimeout);
       _lastSentPosition = position;
       _lastServerErrorMessage = null;
     } on Object catch (error, stackTrace) {
       _logLocationFailure(error, stackTrace);
     } finally {
       _isSending = false;
+      final pending = _pendingPosition;
+      _pendingPosition = null;
+
+      // If we got another position while sending, and it passes the
+      // movement threshold, immediately ping again.
+      if (pending != null && _hasMovedEnough(pending)) {
+        unawaited(_sendPosition(pending));
+      }
     }
   }
 
