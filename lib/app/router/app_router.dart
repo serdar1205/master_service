@@ -116,9 +116,8 @@ class AppRouter {
           builder: (context, state) => const SupportScreen(),
         ),
       ],
-      errorBuilder: (context, state) => AppErrorPage(
-        message: state.error?.toString(),
-      ),
+      errorBuilder: (context, state) =>
+          AppErrorPage(message: state.error?.toString()),
     );
   }
 

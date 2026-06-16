@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
@@ -32,44 +33,55 @@ class MapScreen extends StatelessWidget {
           return LocaleChangeListener(
             onLocaleChanged: () => context.read<MapCubit>().load(),
             child: Scaffold(
-              body: Stack(
-                children: [
-                  Positioned.fill(
-                    child: _ServiceMap(localizations: localizations),
-                  ),
-                  const Positioned(
-                    right: 18,
-                    top: 124,
-                    child: _MapControl(icon: Icons.my_location),
-                  ),
-                  const Positioned(
-                    right: 18,
-                    top: 188,
-                    child: _MapControl(icon: Icons.layers_outlined),
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 76,
-                    child: BlocBuilder<MapCubit, MapState>(
-                      builder: (context, state) {
-                        if (state.status != AppStatus.success) {
-                          return const SizedBox.shrink();
-                        }
+              body: AppRefreshIndicator(
+                onRefresh: () => context.read<MapCubit>().load(),
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: _ServiceMap(localizations: localizations),
+                          ),
+                          const Positioned(
+                            right: 18,
+                            top: 124,
+                            child: _MapControl(icon: Icons.my_location),
+                          ),
+                          const Positioned(
+                            right: 18,
+                            top: 188,
+                            child: _MapControl(icon: Icons.layers_outlined),
+                          ),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 76,
+                            child: BlocBuilder<MapCubit, MapState>(
+                              builder: (context, state) {
+                                if (state.status != AppStatus.success) {
+                                  return const SizedBox.shrink();
+                                }
 
-                        final offers = state.data?.offers ?? const [];
-                        if (offers.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
+                                final offers = state.data?.offers ?? const [];
+                                if (offers.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
 
-                        return _MapOffersSlider(
-                          localizations: localizations,
-                          offers: offers,
-                        );
-                      },
+                                return _MapOffersSlider(
+                                  localizations: localizations,
+                                  offers: offers,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -115,10 +127,14 @@ class _ServiceMapState extends State<_ServiceMap> {
         }
 
         if (state.status == AppStatus.failure) {
-          return AppErrorView(
-            message: state.errorMessage ??
-                widget.localizations.text('errorDefaultMessage'),
-            onRetry: () => context.read<MapCubit>().load(),
+          return AppRefreshableBody(
+            onRefresh: () => context.read<MapCubit>().load(),
+            child: AppErrorView(
+              message:
+                  state.errorMessage ??
+                  widget.localizations.text('errorDefaultMessage'),
+              onRetry: () => context.read<MapCubit>().load(),
+            ),
           );
         }
 

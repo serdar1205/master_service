@@ -14,6 +14,10 @@ class LocalProfileRepository implements ProfileRepository {
       locationKey: 'profileLocation',
       menuItemKeys: ['settings', 'paymentHistory', 'support'],
       balance: 0,
+      isAvailable: true,
     );
   }
+
+  @override
+  Future<void> updateAvailability({required bool isAvailable}) async {}
 }

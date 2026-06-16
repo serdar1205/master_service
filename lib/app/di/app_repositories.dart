@@ -5,6 +5,7 @@ import '../../core/network/api_locale_holder.dart';
 import '../../core/storage/secure_token_storage.dart';
 import '../../features/auth/data/auth_repository_impl.dart';
 import '../../features/auth/domain/auth_repository.dart';
+import '../../features/jobs/application/orders_list_refresh_notifier.dart';
 import '../../features/jobs/data/api_orders_repository.dart';
 import '../../features/jobs/domain/orders_repository.dart';
 import '../../features/map/application/active_order_holder.dart';
@@ -22,6 +23,7 @@ class AppRepositories {
     required this.ordersRepository,
     required this.locationRepository,
     required this.activeOrderHolder,
+    required this.ordersListRefreshNotifier,
   });
 
   factory AppRepositories.create() {
@@ -32,6 +34,7 @@ class AppRepositories {
       localeHolder: localeHolder,
     );
     final activeOrderHolder = ActiveOrderHolder();
+    final ordersListRefreshNotifier = OrdersListRefreshNotifier();
 
     return AppRepositories(
       tokenStorage: tokenStorage,
@@ -41,6 +44,7 @@ class AppRepositories {
       ordersRepository: ApiOrdersRepository(apiClient),
       locationRepository: ApiLocationRepository(apiClient),
       activeOrderHolder: activeOrderHolder,
+      ordersListRefreshNotifier: ordersListRefreshNotifier,
     );
   }
 
@@ -51,6 +55,7 @@ class AppRepositories {
   final OrdersRepository ordersRepository;
   final LocationRepository locationRepository;
   final ActiveOrderHolder activeOrderHolder;
+  final OrdersListRefreshNotifier ordersListRefreshNotifier;
 }
 
 class AppRepositoriesScope extends InheritedWidget {

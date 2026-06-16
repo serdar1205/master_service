@@ -6,6 +6,7 @@ import '../../../../app/di/app_repositories.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../domain/order_models.dart';
 import '../../domain/orders_repository.dart';
@@ -24,40 +25,54 @@ class JobHistoryScreen extends StatelessWidget {
         appBar: AppBar(title: Text(localizations.text('history'))),
         body: BlocBuilder<_HistoryCubit, _HistoryState>(
           builder: (context, state) {
-            if (state.status == AppStatus.loading) {
+            Future<void> refreshHistory() =>
+                context.read<_HistoryCubit>().load();
+
+            if (state.status == AppStatus.loading && state.jobs.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
 
             if (state.status == AppStatus.failure) {
-              return AppErrorView(
-                message: state.errorMessage ??
-                    localizations.text('errorDefaultMessage'),
-                onRetry: () => context.read<_HistoryCubit>().load(),
+              return AppRefreshableBody(
+                onRefresh: refreshHistory,
+                child: AppErrorView(
+                  message:
+                      state.errorMessage ??
+                      localizations.text('errorDefaultMessage'),
+                  onRetry: refreshHistory,
+                ),
               );
             }
 
             final jobs = state.jobs;
             if (jobs.isEmpty) {
-              return Center(child: Text(localizations.text('placeholder')));
+              return AppRefreshableBody(
+                onRefresh: refreshHistory,
+                child: Center(child: Text(localizations.text('placeholder'))),
+              );
             }
 
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: jobs.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final job = jobs[index];
-                return ListTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: Color(0xFFD7E0E3)),
-                  ),
-                  title: Text(job.title),
-                  subtitle: Text('${job.category} • ${job.address}'),
-                  trailing: Text(job.distanceText),
-                  onTap: () => context.go(AppRoutes.jobDetailsPath(job.id)),
-                );
-              },
+            return AppRefreshIndicator(
+              onRefresh: refreshHistory,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: jobs.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final job = jobs[index];
+                  return ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Color(0xFFD7E0E3)),
+                    ),
+                    title: Text(job.title),
+                    subtitle: Text('${job.category} • ${job.address}'),
+                    trailing: Text(job.distanceText),
+                    onTap: () => context.go(AppRoutes.jobDetailsPath(job.id)),
+                  );
+                },
+              ),
             );
           },
         ),

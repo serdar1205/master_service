@@ -27,12 +27,20 @@ docs {
   # Upload Task Photo
 
   Upload a before or after photo for a task.
-  Photo is processed asynchronously (Queue + Job) and converted to WebP.
-  Response is immediate with `status: pending`.
+  Photo is processed asynchronously and converted to WebP.
+
+  **Content-Type:** `multipart/form-data`
 
   **Fields:**
+  ```json
+  {
+    "type": "before",
+    "photo": "/path/to/photo.jpg"
+  }
+  ```
+
   - `type` — `"before"` or `"after"`
-  - `photo` — image file (max 8 MB, image/*)
+  - `photo` — image file (not a JSON string; send as multipart file)
 
   **Response 202 Accepted:**
   ```json
@@ -41,5 +49,14 @@ docs {
     "status": "pending",
     "type": "before"
   }
+  ```
+
+  After processing completes, `GET /api/v1/master/orders/{id}` returns task photos as arrays:
+  ```json
+  "before_photos": [
+    { "id": 1, "url": "https://.../storage/...", "status": "pending" },
+    { "id": 2, "url": "https://.../storage/...", "status": "done" }
+  ],
+  "after_photos": []
   ```
 }

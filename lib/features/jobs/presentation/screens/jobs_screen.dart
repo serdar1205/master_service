@@ -7,13 +7,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_badge.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
+import '../../../../app/widgets/orders_refresh_listener.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../application/jobs_cubit.dart';
-import '../../domain/order_models.dart';
+import '../../domain/orders_filter.dart';
 
 class JobsScreen extends StatelessWidget {
   const JobsScreen({super.key});
@@ -33,7 +35,7 @@ class JobsScreen extends StatelessWidget {
         unawaited(
           cubit.load().then((_) {
             repositories.activeOrderHolder.updateFromDashboard(
-              cubit.state.data,
+              cubit.state.dashboard,
             );
           }),
         );
@@ -41,156 +43,221 @@ class JobsScreen extends StatelessWidget {
       },
       child: Builder(
         builder: (context) {
-          return LocaleChangeListener(
-            onLocaleChanged: () {
+          return OrdersRefreshListener(
+            onRefreshRequested: () {
               final cubit = context.read<JobsCubit>();
               unawaited(
                 cubit.load().then((_) {
                   repositories.activeOrderHolder.updateFromDashboard(
-                    cubit.state.data,
+                    cubit.state.dashboard,
                   );
                 }),
               );
             },
-            child: Scaffold(
-              backgroundColor: const Color(0xFFF4FBFB),
-              body: SafeArea(
-                child: Column(
-                  children: [
-                    _OrdersHeader(localizations: localizations),
-                    Expanded(
-                      child: BlocBuilder<JobsCubit, JobsState>(
-                        builder: (context, state) {
-                          if (state.status == AppStatus.loading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
+            child: LocaleChangeListener(
+              onLocaleChanged: () {
+                final cubit = context.read<JobsCubit>();
+                unawaited(
+                  cubit.load().then((_) {
+                    repositories.activeOrderHolder.updateFromDashboard(
+                      cubit.state.dashboard,
+                    );
+                  }),
+                );
+              },
+              child: Scaffold(
+                backgroundColor: const Color(0xFFF4FBFB),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      _OrdersHeader(localizations: localizations),
+                      Expanded(
+                        child: BlocBuilder<JobsCubit, JobsState>(
+                          builder: (context, state) {
+                            Future<void> refreshJobs() async {
+                              final cubit = context.read<JobsCubit>();
+                              await cubit.load();
+                              if (!context.mounted) {
+                                return;
+                              }
+                              repositories.activeOrderHolder
+                                  .updateFromDashboard(cubit.state.dashboard);
+                            }
 
-                          if (state.status == AppStatus.failure) {
-                            return AppErrorView(
-                              message: state.errorMessage ??
-                                  localizations.text('errorDefaultMessage'),
-                              onRetry: () => context.read<JobsCubit>().load(),
-                            );
-                          }
+                            if (state.status == AppStatus.loading &&
+                                state.dashboard == null) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
 
-                          final data = state.data;
-                          if (data == null) {
-                            return const SizedBox.shrink();
-                          }
-
-                          return ListView(
-                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                            children: [
-                              Text(
-                                localizations.text('myJobsTitle'),
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(
-                                      color: const Color(0xFF101719),
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                localizations.text('myJobsSubtitle'),
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: const Color(0xFF526168),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                              ),
-                              const SizedBox(height: 14),
-                              _StatsRow(
-                                localizations: localizations,
-                                activeCount: data.activeCount.toString(),
-                                completedCount: data.completedCount.toString(),
-                              ),
-                              const SizedBox(height: 14),
-                              for (
-                                var i = 0;
-                                i < data.activeJobs.length;
-                                i++
-                              ) ...[
-                                _OrderCard(
-                                  category: data.activeJobs[i].category,
-                                  title: data.activeJobs[i].title,
-                                  address: data.activeJobs[i].address,
-                                  price: data.activeJobs[i].priceText,
-                                  status: localizations.text(
-                                    data.activeJobs[i].statusKey,
-                                  ),
-                                  actionLabel: localizations.text(
-                                    data.activeJobs[i].actionKey,
-                                  ),
-                                  accentIcon: i == 0
-                                      ? Icons.electrical_services
-                                      : i == 1
-                                      ? Icons.plumbing
-                                      : Icons.air,
-                                  photoColor: i == 0
-                                      ? const Color(0xFF94A69A)
-                                      : i == 1
-                                      ? const Color(0xFF8FBEC1)
-                                      : const Color(0xFFAFC8C3),
-                                  secondaryIcon: i == 1
-                                      ? Icons.chat_bubble_outline
-                                      : Icons.phone_outlined,
-                                  outlinedPrimary:
-                                      data.activeJobs[i].isOutlinedAction,
-                                  onPrimaryAction: () async {
-                                    final job = data.activeJobs[i];
-                                    if (job.actionKey == 'startJob') {
-                                      final cubit = context.read<JobsCubit>();
-                                      final started = await cubit.startOrder(
-                                        job.id,
-                                      );
-                                      if (started && context.mounted) {
-                                        repositories.activeOrderHolder
-                                            .updateFromDashboard(
-                                              cubit.state.data,
-                                            );
-                                      }
-                                      return;
-                                    }
-                                    if (context.mounted) {
-                                      context.go(
-                                        AppRoutes.jobDetailsPath(job.id),
-                                      );
-                                    }
-                                  },
-                                  onSecondaryAction: () {},
+                            if (state.status == AppStatus.failure) {
+                              return AppRefreshableBody(
+                                onRefresh: refreshJobs,
+                                child: AppErrorView(
+                                  message:
+                                      state.errorMessage ??
+                                      localizations.text('errorDefaultMessage'),
+                                  onRetry: refreshJobs,
                                 ),
-                                if (i != data.activeJobs.length - 1)
+                              );
+                            }
+
+                            final dashboard = state.dashboard;
+                            if (dashboard == null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final jobs = state.jobs;
+                            final isListLoading =
+                                state.status == AppStatus.loading;
+
+                            return AppRefreshIndicator(
+                              onRefresh: refreshJobs,
+                              child: ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  14,
+                                  16,
+                                  16,
+                                ),
+                                children: [
+                                  Text(
+                                    localizations.text('myJobsTitle'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          color: const Color(0xFF101719),
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    localizations.text('myJobsSubtitle'),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: const Color(0xFF526168),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                  ),
                                   const SizedBox(height: 14),
-                              ],
-                              const SizedBox(height: 24),
-                              Text(
-                                localizations.text('ordersHistory'),
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      color: const Color(0xFF101719),
-                                      fontWeight: FontWeight.w900,
+                                  _StatsRow(
+                                    localizations: localizations,
+                                    activeCount: state.activeCount.toString(),
+                                    completedCount: state.completedCount
+                                        .toString(),
+                                    selectedFilter: state.filter,
+                                    onFilterSelected: (filter) {
+                                      context.read<JobsCubit>().setFilter(
+                                        filter,
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 14),
+                                  if (isListLoading && jobs.isEmpty)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 32,
+                                      ),
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    )
+                                  else if (jobs.isEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 24,
+                                      ),
+                                      child: Text(
+                                        localizations.text('placeholder'),
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              color: const Color(0xFF6D7A82),
+                                            ),
+                                      ),
+                                    )
+                                  else
+                                    for (var i = 0; i < jobs.length; i++) ...[
+                                      _OrderCard(
+                                        category: jobs[i].category,
+                                        title: jobs[i].title,
+                                        address: jobs[i].address,
+                                        price: jobs[i].priceText,
+                                        status: localizations.text(
+                                          jobs[i].statusKey,
+                                        ),
+                                        actionLabel: localizations.text(
+                                          jobs[i].actionKey,
+                                        ),
+                                        accentIcon: switch (i % 3) {
+                                          0 => Icons.electrical_services,
+                                          1 => Icons.plumbing,
+                                          _ => Icons.air,
+                                        },
+                                        photoColor: switch (i % 3) {
+                                          0 => const Color(0xFF94A69A),
+                                          1 => const Color(0xFF8FBEC1),
+                                          _ => const Color(0xFFAFC8C3),
+                                        },
+                                        secondaryIcon: jobs[i].isHistory
+                                            ? Icons.description_outlined
+                                            : i % 3 == 1
+                                            ? Icons.chat_bubble_outline
+                                            : Icons.phone_outlined,
+                                        outlinedPrimary:
+                                            jobs[i].isOutlinedAction,
+                                        onPrimaryAction: () async {
+                                          final job = jobs[i];
+                                          if (job.actionKey == 'startJob') {
+                                            final cubit = context
+                                                .read<JobsCubit>();
+                                            final started = await cubit
+                                                .startOrder(job.id);
+                                            if (started && context.mounted) {
+                                              repositories.activeOrderHolder
+                                                  .updateFromDashboard(
+                                                    cubit.state.dashboard,
+                                                  );
+                                            }
+                                            return;
+                                          }
+                                          if (context.mounted) {
+                                            context.go(
+                                              AppRoutes.jobDetailsPath(job.id),
+                                            );
+                                          }
+                                        },
+                                        onSecondaryAction: () {},
+                                      ),
+                                      if (i != jobs.length - 1)
+                                        const SizedBox(height: 14),
+                                    ],
+                                  if (isListLoading && jobs.isNotEmpty)
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 12),
+                                      child: Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      ),
                                     ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                localizations.text('completedOrdersSubtitle'),
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: const Color(0xFF526168)),
-                              ),
-                              const SizedBox(height: 14),
-                              if (data.historyJobs.isNotEmpty)
-                                _HistoryCard(
-                                  localizations: localizations,
-                                  job: data.historyJobs.first,
-                                ),
-                            ],
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -250,24 +317,38 @@ class _StatsRow extends StatelessWidget {
     required this.localizations,
     required this.activeCount,
     required this.completedCount,
+    required this.selectedFilter,
+    required this.onFilterSelected,
   });
 
   final AppLocalizations localizations;
   final String activeCount;
   final String completedCount;
+  final OrdersFilter selectedFilter;
+  final ValueChanged<OrdersFilter> onFilterSelected;
 
   @override
   Widget build(BuildContext context) {
+    final activeSelected = selectedFilter == OrdersFilter.active;
+    final historySelected = selectedFilter == OrdersFilter.history;
+
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             value: activeCount,
-            label: 'Aktiw',
+            label: localizations.text('active'),
             icon: Icons.work_history_outlined,
-            backgroundColor: JobsScreen._brandColor,
-            foregroundColor: Colors.white,
-            borderColor: JobsScreen._brandColor,
+            backgroundColor: activeSelected
+                ? JobsScreen._brandColor
+                : Colors.white,
+            foregroundColor: activeSelected
+                ? Colors.white
+                : const Color(0xFF1B2327),
+            borderColor: activeSelected
+                ? JobsScreen._brandColor
+                : const Color(0xFFD7E0E3),
+            onTap: () => onFilterSelected(OrdersFilter.active),
           ),
         ),
         const SizedBox(width: 12),
@@ -276,9 +357,16 @@ class _StatsRow extends StatelessWidget {
             value: completedCount,
             label: localizations.text('completed'),
             icon: Icons.check_circle_outline,
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF1B2327),
-            borderColor: const Color(0xFFD7E0E3),
+            backgroundColor: historySelected
+                ? JobsScreen._brandColor
+                : Colors.white,
+            foregroundColor: historySelected
+                ? Colors.white
+                : const Color(0xFF1B2327),
+            borderColor: historySelected
+                ? JobsScreen._brandColor
+                : const Color(0xFFD7E0E3),
+            onTap: () => onFilterSelected(OrdersFilter.history),
           ),
         ),
       ],
@@ -294,6 +382,7 @@ class _StatCard extends StatelessWidget {
     required this.backgroundColor,
     required this.foregroundColor,
     required this.borderColor,
+    required this.onTap,
   });
 
   final String value;
@@ -302,44 +391,52 @@ class _StatCard extends StatelessWidget {
   final Color backgroundColor;
   final Color foregroundColor;
   final Color borderColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 88,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: backgroundColor,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: Icon(
-              icon,
-              color: foregroundColor.withValues(alpha: 0.9),
-              size: 22,
-            ),
+        child: Ink(
+          height: 88,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: borderColor, width: 1.5),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: foregroundColor,
-              fontWeight: FontWeight.w900,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Icon(
+                  icon,
+                  color: foregroundColor.withValues(alpha: 0.9),
+                  size: 22,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: foregroundColor,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: foregroundColor.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: foregroundColor.withValues(alpha: 0.85),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -685,102 +782,6 @@ class _StatusPill extends StatelessWidget {
             height: 1.05,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({required this.localizations, required this.job});
-
-  final AppLocalizations localizations;
-  final JobListItem job;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: const Color(0xFFDCE5E7)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _OrderPhoto(
-            price: job.priceText,
-            color: Color(0xFF9FB8B9),
-            accentIcon: Icons.plumbing,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    _CategoryPill(label: job.category),
-                    const Spacer(),
-                    _StatusPill(label: localizations.text('completed')),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  job.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: const Color(0xFF11191C),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.navigation_outlined,
-                      color: Color(0xFF536167),
-                      size: 15,
-                    ),
-                    SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        job.address,
-                        style: TextStyle(
-                          color: Color(0xFF536167),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        job.distanceText,
-                        style: TextStyle(color: Color(0xFF526168)),
-                      ),
-                    ),
-                    Text(
-                      localizations.text('report'),
-                      style: const TextStyle(
-                        color: Color(0xFF526168),
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Color(0xFF526168),
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,0 +1,42 @@
+meta {
+  name: Update Availability
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{base_url}}/api/v1/master/availability
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "is_available": false
+  }
+}
+
+docs {
+  # Update Master Availability
+
+  Toggles whether the master is available to receive new orders.
+
+  **Request body:**
+  ```json
+  {
+    "is_available": false
+  }
+  ```
+
+  When `is_available` is `true`, the master is ready to work.
+  When `false`, new orders should not be assigned.
+}

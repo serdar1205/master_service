@@ -7,6 +7,11 @@ import '../domain/order_models.dart';
 import '../domain/orders_repository.dart';
 import 'order_mapper.dart';
 
+String _fileNameFromPath(String filePath) {
+  final name = filePath.split(RegExp(r'[\\/]')).last;
+  return name.isEmpty ? 'photo.jpg' : name;
+}
+
 class ApiOrdersRepository implements OrdersRepository {
   ApiOrdersRepository(this._apiClient);
 
@@ -22,7 +27,13 @@ class ApiOrdersRepository implements OrdersRepository {
       completedCount: history.length,
       activeJobs: active,
       historyJobs: history,
+      allJobs: [...active, ...history],
     );
+  }
+
+  @override
+  Future<List<JobListItem>> fetchAllOrders() {
+    return _fetchOrders();
   }
 
   @override
@@ -30,21 +41,20 @@ class ApiOrdersRepository implements OrdersRepository {
     return _fetchOrders(filter: 'history');
   }
 
-  Future<List<JobListItem>> _fetchOrders({required String filter}) async {
+  @override
+  Future<List<JobListItem>> fetchOrders({required String filter}) {
+    return _fetchOrders(filter: filter);
+  }
+
+  Future<List<JobListItem>> _fetchOrders({String? filter}) async {
     try {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
         '/api/v1/master/orders',
-        queryParameters: {'filter': filter},
+        queryParameters: filter == null ? null : {'filter': filter},
       );
       final data = response.data?['data'] as List<dynamic>? ?? const [];
-      final isHistory = filter == 'history';
       return data
-          .map(
-            (item) => OrderMapper.fromListJson(
-              item as Map<String, dynamic>,
-              isHistory: isHistory,
-            ),
-          )
+          .map((item) => OrderMapper.fromListJson(item as Map<String, dynamic>))
           .toList();
     } on DioException catch (error) {
       throw DioErrorMapper.map(error);
@@ -68,9 +78,12 @@ class ApiOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<void> startOrder(String orderId) async {
+  Future<JobDetailsData> startOrder(String orderId) async {
     try {
-      await _apiClient.dio.post<void>('/api/v1/master/orders/$orderId/start');
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        '/api/v1/master/orders/$orderId/start',
+      );
+      return _parseOrderResponse(response.data);
     } on DioException catch (error) {
       throw DioErrorMapper.map(error);
     }
@@ -89,25 +102,19 @@ class ApiOrdersRepository implements OrdersRepository {
       );
       final data = response.data?['data'] as Map<String, dynamic>?;
       if (data == null) {
-        throw const ApiException(
-          statusCode: 500,
-          message: 'Could not create task.',
+        throw ApiException(
+          statusCode: response.statusCode ?? 500,
+          message: _messageFromBody(response.data) ?? 'Could not create task.',
         );
       }
-      return OrderTaskData(
-        id: '${data['id']}',
-        title: data['title'] as String? ?? title,
-        description: data['description'] as String? ?? description,
-        beforePhotoUrl: data['before_photo'] as String?,
-        afterPhotoUrl: data['after_photo'] as String?,
-      );
+      return OrderMapper.taskFromJson(data);
     } on DioException catch (error) {
       throw DioErrorMapper.map(error);
     }
   }
 
   @override
-  Future<void> uploadTaskPhoto({
+  Future<OrderTaskData> uploadTaskPhoto({
     required String orderId,
     required String taskId,
     required String type,
@@ -116,30 +123,58 @@ class ApiOrdersRepository implements OrdersRepository {
     try {
       final formData = FormData.fromMap({
         'type': type,
-        'photo': await MultipartFile.fromFile(filePath),
+        'photo': await MultipartFile.fromFile(
+          filePath,
+          filename: _fileNameFromPath(filePath),
+        ),
       });
-      await _apiClient.dio.post<void>(
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
         '/api/v1/master/orders/$orderId/tasks/$taskId/photo',
         data: formData,
-        options: Options(contentType: 'multipart/form-data'),
       );
+      final data = response.data?['data'] as Map<String, dynamic>?;
+      if (data == null) {
+        throw ApiException(
+          statusCode: response.statusCode ?? 500,
+          message: _messageFromBody(response.data) ?? 'Could not upload photo.',
+        );
+      }
+      return OrderMapper.taskFromJson(data);
     } on DioException catch (error) {
       throw DioErrorMapper.map(error);
     }
   }
 
   @override
-  Future<void> completeOrder({
+  Future<JobDetailsData> completeOrder({
     required String orderId,
     required num finalPrice,
   }) async {
     try {
-      await _apiClient.dio.post<void>(
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
         '/api/v1/master/orders/$orderId/complete',
         data: {'final_price': finalPrice},
       );
+      return _parseOrderResponse(response.data);
     } on DioException catch (error) {
       throw DioErrorMapper.map(error);
     }
+  }
+
+  JobDetailsData _parseOrderResponse(Map<String, dynamic>? body) {
+    final data = body?['data'] as Map<String, dynamic>?;
+    if (data == null) {
+      throw ApiException(
+        statusCode: 500,
+        message: _messageFromBody(body) ?? 'Invalid order response.',
+      );
+    }
+
+    return OrderMapper.fromDetailJson(data);
+  }
+
+  String? _messageFromBody(Map<String, dynamic>? body) {
+    final message = body?['message'];
+    return message is String && message.isNotEmpty ? message : null;
   }
 }

@@ -39,9 +39,17 @@ docs {
       "id": 7,
       "title": "Замена прокладки крана",
       "description": "Заменил резиновую прокладку, кран перестал капать",
-      "before_photo": null,
-      "after_photo": null
+      "before_photos": [],
+      "after_photos": []
     }
+  }
+  ```
+
+  **Errors:**
+  - `422` — order not in `in_progress` status:
+  ```json
+  {
+    "message": "Tasks can only be created for orders that are in progress."
   }
   ```
 }

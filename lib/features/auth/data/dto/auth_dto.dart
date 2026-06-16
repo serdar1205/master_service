@@ -19,6 +19,7 @@ class MasterDto {
     required this.phone,
     required this.balance,
     required this.isActive,
+    required this.isAvailable,
     required this.accessExpiresAt,
     required this.categories,
     this.city,
@@ -34,6 +35,7 @@ class MasterDto {
       phone: json['phone'] as String? ?? '',
       balance: (json['balance'] as num?) ?? 0,
       isActive: json['is_active'] as bool? ?? true,
+      isAvailable: json['is_available'] as bool? ?? true,
       accessExpiresAt: json['access_expires_at'] as String?,
       categories: categoriesJson
           .map((item) => CategoryDto.fromJson(item as Map<String, dynamic>))
@@ -51,6 +53,7 @@ class MasterDto {
   final String phone;
   final num balance;
   final bool isActive;
+  final bool isAvailable;
   final String? accessExpiresAt;
   final List<CategoryDto> categories;
   final CityDto? city;

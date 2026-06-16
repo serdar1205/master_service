@@ -3,14 +3,14 @@ import '../domain/order_models.dart';
 class OrderMapper {
   const OrderMapper._();
 
-  static JobListItem fromListJson(
-    Map<String, dynamic> json, {
-    bool isHistory = false,
-  }) {
+  static const int _photoSlotsPerType = 2;
+
+  static JobListItem fromListJson(Map<String, dynamic> json) {
     final status = json['status'] as String? ?? 'assigned';
     final description = json['description'] as String? ?? '';
     final category = json['category'] as String? ?? '';
     final createdAt = json['created_at'] as String? ?? '';
+    final isHistory = _isHistoryStatus(status);
 
     return JobListItem(
       id: '${json['id']}',
@@ -24,6 +24,14 @@ class OrderMapper {
       isOutlinedAction: status == 'in_progress',
       isHistory: isHistory,
     );
+  }
+
+  static bool _isHistoryStatus(String status) {
+    return status == 'completed' || status == 'cancelled';
+  }
+
+  static OrderTaskData taskFromJson(Map<String, dynamic> json) {
+    return _taskFromJson(json);
   }
 
   static JobDetailsData fromDetailJson(Map<String, dynamic> json) {
@@ -40,21 +48,19 @@ class OrderMapper {
 
     if (tasks.isNotEmpty) {
       final task = tasks.first;
-      beforePhotos.add(task.beforePhotoUrl);
-      beforePhotos.add(null);
-      afterPhotos.add(task.afterPhotoUrl);
-      afterPhotos.add(null);
+      beforePhotos.addAll(_photoSlotsFromList(task.beforePhotos));
+      afterPhotos.addAll(_photoSlotsFromList(task.afterPhotos));
     } else {
       for (final photo in photos) {
-        final url = photo['url'] as String?;
+        final url = _photoUrlFromJson(photo);
         if (url != null) {
           beforePhotos.add(url);
         }
       }
-      while (beforePhotos.length < 2) {
+      while (beforePhotos.length < _photoSlotsPerType) {
         beforePhotos.add(null);
       }
-      afterPhotos.addAll([null, null]);
+      afterPhotos.addAll(List<String?>.filled(_photoSlotsPerType, null));
     }
 
     return JobDetailsData(
@@ -70,6 +76,11 @@ class OrderMapper {
       tasks: tasks,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      finalPrice: json['final_price'] as num?,
+      assignedAt: json['assigned_at'] as String?,
+      startedAt: json['started_at'] as String?,
+      completedAt: json['completed_at'] as String?,
+      createdAt: json['created_at'] as String?,
     );
   }
 
@@ -78,9 +89,75 @@ class OrderMapper {
       id: '${json['id']}',
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      beforePhotoUrl: json['before_photo'] as String?,
-      afterPhotoUrl: json['after_photo'] as String?,
+      beforePhotos: _photosListFromJson(
+        json['before_photos'],
+        json['before_photo'],
+      ),
+      afterPhotos: _photosListFromJson(
+        json['after_photos'],
+        json['after_photo'],
+      ),
     );
+  }
+
+  static List<OrderTaskPhoto> _photosListFromJson(
+    dynamic arrayValue,
+    dynamic legacyValue,
+  ) {
+    if (arrayValue is List) {
+      return arrayValue
+          .whereType<Map>()
+          .map((item) => _photoFromJson(Map<String, dynamic>.from(item)))
+          .whereType<OrderTaskPhoto>()
+          .toList();
+    }
+
+    final legacyUrl = _photoUrlFromJson(legacyValue);
+    if (legacyUrl != null) {
+      return [OrderTaskPhoto(id: '', url: legacyUrl, status: 'done')];
+    }
+
+    return const [];
+  }
+
+  static OrderTaskPhoto? _photoFromJson(Map<String, dynamic> json) {
+    final url = json['url'] as String?;
+    if (url == null || url.isEmpty) {
+      return null;
+    }
+
+    return OrderTaskPhoto(
+      id: '${json['id']}',
+      url: url,
+      status: json['status'] as String? ?? 'done',
+    );
+  }
+
+  static List<String?> _photoSlotsFromList(List<OrderTaskPhoto> photos) {
+    final slots = List<String?>.filled(_photoSlotsPerType, null);
+    for (var i = 0; i < photos.length && i < _photoSlotsPerType; i++) {
+      slots[i] = photos[i].url;
+    }
+    return slots;
+  }
+
+  static String? _photoUrlFromJson(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is String) {
+      return value.isEmpty ? null : value;
+    }
+
+    if (value is Map) {
+      final url = value['url'];
+      if (url is String && url.isNotEmpty) {
+        return url;
+      }
+    }
+
+    return null;
   }
 
   static String _statusKey(String apiStatus) {
@@ -107,6 +184,24 @@ class OrderMapper {
       return value;
     }
     return '${value.substring(0, maxLength - 1)}…';
+  }
+
+  static String formatDisplayDate(String? iso) {
+    if (iso == null || iso.isEmpty) {
+      return '';
+    }
+
+    final date = DateTime.tryParse(iso);
+    if (date == null) {
+      return iso;
+    }
+
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year;
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day.$month.$year $hour:$minute';
   }
 
   static String _formatDate(String iso) {

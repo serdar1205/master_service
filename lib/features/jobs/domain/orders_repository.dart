@@ -3,11 +3,15 @@ import 'order_models.dart';
 abstract interface class OrdersRepository {
   Future<JobsDashboardData> fetchDashboard();
 
+  Future<List<JobListItem>> fetchAllOrders();
+
   Future<List<JobListItem>> fetchHistory();
+
+  Future<List<JobListItem>> fetchOrders({required String filter});
 
   Future<JobDetailsData> fetchOrder(String orderId);
 
-  Future<void> startOrder(String orderId);
+  Future<JobDetailsData> startOrder(String orderId);
 
   Future<OrderTaskData> createTask({
     required String orderId,
@@ -15,14 +19,14 @@ abstract interface class OrdersRepository {
     required String description,
   });
 
-  Future<void> uploadTaskPhoto({
+  Future<OrderTaskData> uploadTaskPhoto({
     required String orderId,
     required String taskId,
     required String type,
     required String filePath,
   });
 
-  Future<void> completeOrder({
+  Future<JobDetailsData> completeOrder({
     required String orderId,
     required num finalPrice,
   });

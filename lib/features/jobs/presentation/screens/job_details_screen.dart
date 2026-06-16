@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,19 +8,21 @@ import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/localization/locale_cubit.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/media/image_pick_service.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/widgets/app_error_view.dart';
-import '../../../../core/widgets/app_toast.dart';
+import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../application/job_details_cubit.dart';
+import '../../domain/order_models.dart';
+import '../widgets/my_tasks_section.dart';
+import '../widgets/order_details_info_card.dart';
 
 const _brandColor = AppColors.brand;
 const _buttonColor = AppColors.buttonTeal;
 
 class JobDetailsScreen extends StatelessWidget {
   const JobDetailsScreen({super.key});
-
-  static final ImagePicker _imagePicker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -34,166 +34,155 @@ class JobDetailsScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) =>
           JobDetailsCubit(repositories.ordersRepository)..load(jobId),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF4FBFB),
-        body: SafeArea(
-          child: Column(
-            children: [
-              _DetailsHeader(localizations: localizations),
-              Expanded(
-                child: BlocBuilder<JobDetailsCubit, JobDetailsState>(
-                  builder: (context, state) {
-                    if (state.status == AppStatus.loading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+      child: _JobDetailsContent(localizations: localizations, jobId: jobId),
+    );
+  }
+}
 
-                    if (state.status == AppStatus.failure) {
-                      return AppErrorView(
-                        message: state.errorMessage ??
+class _JobDetailsContent extends StatefulWidget {
+  const _JobDetailsContent({required this.localizations, required this.jobId});
+
+  final AppLocalizations localizations;
+  final String jobId;
+
+  @override
+  State<_JobDetailsContent> createState() => _JobDetailsContentState();
+}
+
+class _JobDetailsContentState extends State<_JobDetailsContent> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _recoverLostImagePick();
+    });
+  }
+
+  Future<void> _recoverLostImagePick() async {
+    await ImagePickService.recoverLostData(
+      onRecovered: (path) {
+        if (!mounted) {
+          return;
+        }
+
+        context.read<JobDetailsCubit>().addRecoveredTaskPhoto(path);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = widget.localizations;
+    final jobId = widget.jobId;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4FBFB),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _DetailsHeader(localizations: localizations),
+            Expanded(
+              child: BlocBuilder<JobDetailsCubit, JobDetailsState>(
+                builder: (context, state) {
+                  Future<void> refreshDetails() =>
+                      context.read<JobDetailsCubit>().load(jobId);
+
+                  if (state.status == AppStatus.loading && state.data == null) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state.status == AppStatus.failure) {
+                    return AppRefreshableBody(
+                      onRefresh: refreshDetails,
+                      child: AppErrorView(
+                        message:
+                            state.errorMessage ??
                             localizations.text('errorDefaultMessage'),
-                        onRetry: () => context
-                            .read<JobDetailsCubit>()
-                            .load(jobId),
-                      );
-                    }
+                        onRetry: refreshDetails,
+                      ),
+                    );
+                  }
 
-                    final details = state.data;
-                    if (details == null) {
-                      return const SizedBox.shrink();
-                    }
+                  final details = state.data;
+                  if (details == null) {
+                    return const SizedBox.shrink();
+                  }
 
-                    final photoLocked = state.isPhotoActionLocked;
-
-                    return ListView(
+                  return AppRefreshIndicator(
+                    onRefresh: refreshDetails,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                       children: [
-                        _PhotoSection(
-                          title: localizations.text('before'),
-                          icon: Icons.history,
-                          children: [
-                            _PhotoSlot(
-                              label: '${localizations.text('photo')} 1',
-                              imageUrl: details.beforePhotos.first,
-                              enabled: !photoLocked,
-                              onTap: () =>
-                                  _pickAndUploadPhoto(context, type: 'before'),
-                            ),
-                            _PhotoSlot(
-                              label: '${localizations.text('photo')} 2',
-                              imageUrl: details.beforePhotos.length > 1
-                                  ? details.beforePhotos[1]
-                                  : null,
-                              enabled: !photoLocked,
-                              onTap: () =>
-                                  _pickAndUploadPhoto(context, type: 'before'),
-                            ),
-                          ],
+                        OrderDetailsInfoCard(
+                          details: details,
+                          localizations: localizations,
                         ),
                         const SizedBox(height: 18),
-                        _PhotoSection(
-                          title: localizations.text('after'),
-                          icon: Icons.verified_outlined,
-                          children: [
-                            _PhotoSlot(
-                              imageUrl: details.afterPhotos.first,
-                              enabled: !photoLocked,
-                              onTap: () =>
-                                  _pickAndUploadPhoto(context, type: 'after'),
-                            ),
-                            _PhotoSlot(
-                              label: localizations.text('addPhoto'),
-                              imageUrl: details.afterPhotos.length > 1
-                                  ? details.afterPhotos[1]
-                                  : null,
-                              enabled: !photoLocked,
-                              onTap: () =>
-                                  _pickAndUploadPhoto(context, type: 'after'),
-                            ),
-                          ],
+                        MyTasksSection(
+                          tasks: details.tasks,
+                          canEdit: details.isInProgress,
+                          localizations: localizations,
                         ),
-                        const SizedBox(height: 18),
-                        _PriceConfirmationCard(localizations: localizations),
-                        const SizedBox(height: 20),
-                        _CompletionNote(localizations: localizations),
-                        const SizedBox(height: 14),
-                        if (state.errorMessage != null) ...[
-                          Text(
-                            state.errorMessage!,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: Colors.red.shade700),
+                        if (details.isInProgress) ...[
+                          const SizedBox(height: 18),
+                          _PriceConfirmationCard(
+                            localizations: localizations,
+                            details: details,
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 20),
+                          _CompletionNote(localizations: localizations),
+                          const SizedBox(height: 14),
+                          if (state.errorMessage != null) ...[
+                            Text(
+                              state.errorMessage!,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.red.shade700),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                          FilledButton.icon(
+                            onPressed: state.isSubmitting
+                                ? null
+                                : () => _completeOrder(
+                                    context,
+                                    localizations,
+                                    details,
+                                  ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _buttonColor,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              textStyle: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            icon: const Icon(Icons.check_circle_outline),
+                            label: Text(localizations.text('complete')),
+                          ),
                         ],
-                        FilledButton.icon(
-                          onPressed: state.isSubmitting
-                              ? null
-                              : () => _completeOrder(context, localizations),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: _buttonColor,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            textStyle: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          icon: const Icon(Icons.check_circle_outline),
-                          label: Text(localizations.text('complete')),
-                        ),
                       ],
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _pickAndUploadPhoto(
-    BuildContext context, {
-    required String type,
-  }) async {
-    final cubit = context.read<JobDetailsCubit>();
-    if (!cubit.tryBeginPhotoPick()) {
-      return;
-    }
-
-    XFile? image;
-    try {
-      image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-      );
-    } on PlatformException catch (error) {
-      if (!context.mounted) {
-        return;
-      }
-
-      final message = error.code == 'already_active'
-          ? 'Surat saýlaýjy eýýäm açyk. Biraz garaşyň.'
-          : 'Galereýany açyp bolmady.';
-      AppToast.showError(message);
-      return;
-    } finally {
-      cubit.endPhotoPick();
-    }
-
-    if (image == null || !context.mounted) {
-      return;
-    }
-
-    await cubit.uploadPhoto(type: type, filePath: image.path);
-  }
-
   Future<void> _completeOrder(
     BuildContext context,
     AppLocalizations localizations,
+    JobDetailsData details,
   ) async {
-    final priceController = TextEditingController();
+    final priceController = TextEditingController(
+      text: details.finalPrice?.toString() ?? '',
+    );
     final price = await showDialog<num>(
       context: context,
       builder: (dialogContext) {
@@ -235,6 +224,9 @@ class JobDetailsScreen extends StatelessWidget {
     }
 
     if (completed && context.mounted) {
+      AppRepositoriesScope.of(
+        context,
+      ).ordersListRefreshNotifier.requestRefresh();
       context.go(AppRoutes.jobs);
     }
   }
@@ -247,280 +239,127 @@ class _DetailsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
+    return BlocBuilder<JobDetailsCubit, JobDetailsState>(
+      builder: (context, state) {
+        final orderId = state.data?.id;
+        final title = orderId == null
+            ? localizations.text('completeOrderTitle')
+            : localizations.text('orderNumber').replaceAll('{id}', orderId);
+
+        return Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x0F000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-        ],
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  if (GoRouter.of(context).canPop()) {
+                    context.pop();
+                    return;
+                  }
+
+                  context.go(AppRoutes.jobs);
+                },
+                icon: const Icon(Icons.arrow_back, color: _brandColor),
+              ),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: _brandColor,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              if (state.data != null)
+                _StatusChip(label: localizations.text(state.data!.statusKey))
+              else
+                const _LocaleBadgeChip(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE7FBF5),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: const Color(0xFF426A63),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _LocaleBadgeChip extends StatelessWidget {
+  const _LocaleBadgeChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F8F9),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            onPressed: () {
-              if (GoRouter.of(context).canPop()) {
-                context.pop();
-                return;
-              }
+          const Icon(Icons.location_on_outlined, color: _brandColor, size: 15),
+          const SizedBox(width: 4),
+          BlocBuilder<LocaleCubit, LocaleState>(
+            builder: (context, state) {
+              final label = state.locale.languageCode == 'ru' ? 'RU' : 'TM';
 
-              context.go(AppRoutes.jobs);
+              return Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: const Color(0xFF5D686E),
+                  fontWeight: FontWeight.w700,
+                ),
+              );
             },
-            icon: const Icon(Icons.arrow_back, color: _brandColor),
-          ),
-          Expanded(
-            child: Text(
-              localizations.text('completeOrderTitle'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: _brandColor,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F8F9),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  color: _brandColor,
-                  size: 15,
-                ),
-                const SizedBox(width: 4),
-                BlocBuilder<LocaleCubit, LocaleState>(
-                  builder: (context, state) {
-                    final label = state.locale.languageCode == 'ru'
-                        ? 'RU'
-                        : 'TM';
-
-                    return Text(
-                      label,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: const Color(0xFF5D686E),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
-  }
-}
-
-class _PhotoSection extends StatelessWidget {
-  const _PhotoSection({
-    required this.title,
-    required this.icon,
-    required this.children,
-  });
-
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: _brandColor, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF293237),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              Expanded(child: children[i]),
-              if (i != children.length - 1) const SizedBox(width: 8),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PhotoSlot extends StatelessWidget {
-  const _PhotoSlot({
-    this.label,
-    this.imageUrl,
-    this.onTap,
-    this.enabled = true,
-  });
-
-  final String? label;
-  final String? imageUrl;
-  final VoidCallback? onTap;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = this.imageUrl;
-
-    return AspectRatio(
-      aspectRatio: 1,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _brandColor.withValues(alpha: imageUrl == null ? 0.75 : 0),
-              width: 1.4,
-              strokeAlign: BorderSide.strokeAlignInside,
-            ),
-          ),
-          foregroundDecoration: imageUrl == null
-              ? BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _brandColor.withValues(alpha: 0.7),
-                    width: 1.2,
-                    strokeAlign: BorderSide.strokeAlignInside,
-                  ),
-                )
-              : null,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (imageUrl != null)
-                const _PhotoPlaceholder()
-              else
-                const ColoredBox(color: Colors.white),
-              if (imageUrl == null)
-                CustomPaint(painter: _DashedBorderPainter(color: _brandColor)),
-              if (imageUrl != null)
-                ColoredBox(color: Colors.white.withValues(alpha: 0.62)),
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.add_a_photo_outlined,
-                      color: _brandColor,
-                      size: 27,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      label ?? '',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF6D7A82),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PhotoPlaceholder extends StatelessWidget {
-  const _PhotoPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _PhotoPlaceholderPainter());
-  }
-}
-
-class _PhotoPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFFC5D6D9);
-    canvas.drawRect(Offset.zero & size, paint);
-
-    final accent = Paint()..color = const Color(0xFF9DB2B6);
-    canvas.drawCircle(Offset(size.width * 0.32, size.height * 0.4), 26, accent);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          size.width * 0.2,
-          size.height * 0.55,
-          size.width * 0.5,
-          size.height * 0.28,
-        ),
-        const Radius.circular(12),
-      ),
-      accent,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withValues(alpha: 0.9)
-      ..strokeWidth = 1.4
-      ..style = PaintingStyle.stroke;
-    const dash = 6.0;
-    const gap = 5.0;
-    final rect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      const Radius.circular(12),
-    );
-    final path = Path()..addRRect(rect);
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final end = (distance + dash).clamp(0.0, metric.length);
-        canvas.drawPath(metric.extractPath(distance, end), paint);
-        distance += dash + gap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedBorderPainter oldDelegate) {
-    return oldDelegate.color != color;
   }
 }
 
 class _PriceConfirmationCard extends StatelessWidget {
-  const _PriceConfirmationCard({required this.localizations});
+  const _PriceConfirmationCard({
+    required this.localizations,
+    required this.details,
+  });
 
   final AppLocalizations localizations;
+  final JobDetailsData details;
 
   @override
   Widget build(BuildContext context) {
@@ -554,6 +393,16 @@ class _PriceConfirmationCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+          if (details.finalPriceText != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              details.finalPriceText!,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: _brandColor,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Text(
             localizations.text('priceConfirmationDescription'),

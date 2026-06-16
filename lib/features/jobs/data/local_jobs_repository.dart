@@ -39,6 +39,32 @@ class LocalJobsRepository {
           isHistory: true,
         ),
       ],
+      allJobs: [
+        JobListItem(
+          id: 'job-1',
+          category: 'Elektrik',
+          title: 'Rozetka we lentalar',
+          address: 'Aşgabat ş., Magtymguly şaýoly 45',
+          priceText: '250 TMT',
+          statusKey: 'assigned',
+          actionKey: 'startJob',
+          distanceText: '2.5 km',
+          isOutlinedAction: false,
+          isHistory: false,
+        ),
+        JobListItem(
+          id: 'job-h1',
+          category: 'Santehnik',
+          title: 'Turbany çalyşmak',
+          address: 'Aşgabat ş., Görogly köç. 12',
+          priceText: '150 TMT',
+          statusKey: 'completed',
+          actionKey: 'report',
+          distanceText: '12.05.2024',
+          isOutlinedAction: false,
+          isHistory: true,
+        ),
+      ],
     );
   }
 

@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/app_error_view.dart';
+import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_badge.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/application/auth_cubit.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../widgets/profile_categories_section.dart';
@@ -31,78 +33,116 @@ class SettingsScreen extends StatelessWidget {
         builder: (context) {
           return LocaleChangeListener(
             onLocaleChanged: () => context.read<ProfileCubit>().load(),
-            child: Scaffold(
-              backgroundColor: const Color(0xFFF4FBFB),
-              body: SafeArea(
-                child: Column(
-                  children: [
-                    _ProfileHeader(localizations: localizations),
-                    Expanded(
-                      child: BlocBuilder<ProfileCubit, ProfileState>(
-                        builder: (context, state) {
-                          if (state.status == AppStatus.loading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
+            child: BlocListener<ProfileCubit, ProfileState>(
+              listenWhen: (previous, current) =>
+                  previous.errorMessage != current.errorMessage &&
+                  current.errorMessage != null &&
+                  !current.isUpdatingAvailability,
+              listener: (context, state) {
+                final message = state.errorMessage;
+                if (message != null) {
+                  AppToast.showError(message);
+                }
+              },
+              child: Scaffold(
+                backgroundColor: const Color(0xFFF4FBFB),
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      _ProfileHeader(localizations: localizations),
+                      Expanded(
+                        child: BlocBuilder<ProfileCubit, ProfileState>(
+                          builder: (context, state) {
+                            Future<void> refreshProfile() =>
+                                context.read<ProfileCubit>().load();
 
-                          if (state.status == AppStatus.failure) {
-                            return AppErrorView(
-                              message:
-                                  state.errorMessage ??
-                                  localizations.text('errorDefaultMessage'),
-                              onRetry: () =>
-                                  context.read<ProfileCubit>().load(),
-                            );
-                          }
+                            if (state.status == AppStatus.loading &&
+                                state.data == null) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
 
-                          final profile = state.data;
-                          if (profile == null) {
-                            return const SizedBox.shrink();
-                          }
-
-                          return ListView(
-                            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                            children: [
-                              _ProfileCard(
-                                localizations: localizations,
-                                fullName: profile.fullName,
-                                skills: profile.skills,
-                                onEditTap: () =>
-                                    context.push(AppRoutes.editProfile),
-                              ),
-                              const SizedBox(height: 20),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 18),
-                                child: Text(
-                                  localizations.text('accountSettings'),
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: const Color(0xFF9AA7AD),
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 3.2,
-                                      ),
+                            if (state.status == AppStatus.failure) {
+                              return AppRefreshableBody(
+                                onRefresh: refreshProfile,
+                                child: AppErrorView(
+                                  message:
+                                      state.errorMessage ??
+                                      localizations.text('errorDefaultMessage'),
+                                  onRetry: refreshProfile,
                                 ),
+                              );
+                            }
+
+                            final profile = state.data;
+                            if (profile == null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return AppRefreshIndicator(
+                              onRefresh: refreshProfile,
+                              child: ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  14,
+                                  16,
+                                  16,
+                                ),
+                                children: [
+                                  _ProfileCard(
+                                    localizations: localizations,
+                                    fullName: profile.fullName,
+                                    skills: profile.skills,
+                                    onEditTap: () =>
+                                        context.push(AppRoutes.editProfile),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _AvailabilityCard(
+                                    localizations: localizations,
+                                    isAvailable: profile.isAvailable,
+                                    isUpdating: state.isUpdatingAvailability,
+                                    onChanged: (value) => context
+                                        .read<ProfileCubit>()
+                                        .setAvailability(value),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 18),
+                                    child: Text(
+                                      localizations.text('accountSettings'),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: const Color(0xFF9AA7AD),
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: 3.2,
+                                          ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _SettingsMenu(
+                                    localizations: localizations,
+                                    menuItemKeys: profile.menuItemKeys,
+                                    onAccountTap: () =>
+                                        context.push(AppRoutes.accountSettings),
+                                    // onPaymentTap: () =>
+                                    //     context.push(AppRoutes.paymentHistory),
+                                    onSupportTap: () =>
+                                        context.push(AppRoutes.supportCenter),
+                                  ),
+                                  const SizedBox(height: 18),
+                                  _SignOutButton(localizations: localizations),
+                                ],
                               ),
-                              const SizedBox(height: 16),
-                              _SettingsMenu(
-                                localizations: localizations,
-                                menuItemKeys: profile.menuItemKeys,
-                                onAccountTap: () =>
-                                    context.push(AppRoutes.accountSettings),
-                                // onPaymentTap: () =>
-                                //     context.push(AppRoutes.paymentHistory),
-                                onSupportTap: () =>
-                                    context.push(AppRoutes.supportCenter),
-                              ),
-                              const SizedBox(height: 18),
-                              _SignOutButton(localizations: localizations),
-                            ],
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -298,6 +338,73 @@ class _ProfileAvatar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AvailabilityCard extends StatelessWidget {
+  const _AvailabilityCard({
+    required this.localizations,
+    required this.isAvailable,
+    required this.isUpdating,
+    required this.onChanged,
+  });
+
+  final AppLocalizations localizations;
+  final bool isAvailable;
+  final bool isUpdating;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 14,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: SwitchListTile(
+        value: isAvailable,
+        onChanged: isUpdating ? null : onChanged,
+        activeThumbColor: Colors.white,
+        activeTrackColor: SettingsScreen._brandColor,
+        title: Text(
+          localizations.text('workAvailability'),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: const Color(0xFF242B2F),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          localizations.text('workAvailabilityHint'),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6D7A82)),
+        ),
+        secondary: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isAvailable
+                ? const Color(0xFFE8F8F6)
+                : const Color(0xFFF4F8F9),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            isAvailable ? Icons.work_outline : Icons.work_off_outlined,
+            color: isAvailable
+                ? SettingsScreen._brandColor
+                : const Color(0xFF9AA7AD),
+            size: 22,
+          ),
+        ),
+      ),
     );
   }
 }

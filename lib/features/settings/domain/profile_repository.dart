@@ -6,6 +6,7 @@ class ProfileData {
     required this.locationKey,
     required this.menuItemKeys,
     required this.balance,
+    required this.isAvailable,
   });
 
   final String fullName;
@@ -14,8 +15,31 @@ class ProfileData {
   final String locationKey;
   final List<String> menuItemKeys;
   final num balance;
+  final bool isAvailable;
+
+  ProfileData copyWith({
+    String? fullName,
+    String? phone,
+    List<String>? skills,
+    String? locationKey,
+    List<String>? menuItemKeys,
+    num? balance,
+    bool? isAvailable,
+  }) {
+    return ProfileData(
+      fullName: fullName ?? this.fullName,
+      phone: phone ?? this.phone,
+      skills: skills ?? this.skills,
+      locationKey: locationKey ?? this.locationKey,
+      menuItemKeys: menuItemKeys ?? this.menuItemKeys,
+      balance: balance ?? this.balance,
+      isAvailable: isAvailable ?? this.isAvailable,
+    );
+  }
 }
 
 abstract interface class ProfileRepository {
   Future<ProfileData> fetchProfile();
+
+  Future<void> updateAvailability({required bool isAvailable});
 }

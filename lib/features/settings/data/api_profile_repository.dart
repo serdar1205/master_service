@@ -33,6 +33,19 @@ class ApiProfileRepository implements ProfileRepository {
         locationKey: master.city?.name ?? '',
         menuItemKeys: const ['settings', 'paymentHistory', 'support'],
         balance: master.balance,
+        isAvailable: master.isAvailable,
+      );
+    } on DioException catch (error) {
+      throw DioErrorMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> updateAvailability({required bool isAvailable}) async {
+    try {
+      await _apiClient.dio.patch<void>(
+        '/api/v1/master/availability',
+        data: {'is_available': isAvailable},
       );
     } on DioException catch (error) {
       throw DioErrorMapper.map(error);
