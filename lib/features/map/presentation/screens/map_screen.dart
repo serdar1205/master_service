@@ -38,36 +38,23 @@ class MapScreen extends StatelessWidget {
           return LocaleChangeListener(
             onLocaleChanged: () => context.read<MapCubit>().load(),
             child: Scaffold(
-              body: AppRefreshIndicator(
-                onRefresh: () => context.read<MapCubit>().load(),
-                child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: _ServiceMap(
-                              localizations: localizations,
-                              onOrderTap: openOrderSheet,
-                            ),
-                          ),
-                          const Positioned(
-                            right: 18,
-                            top: 124,
-                            child: _MapControl(icon: Icons.my_location),
-                          ),
-                          const Positioned(
-                            right: 18,
-                            top: 188,
-                            child: _MapControl(icon: Icons.layers_outlined),
-                          ),
-                        ],
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  return AppRefreshIndicator(
+                    onRefresh: () => context.read<MapCubit>().load(),
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: constraints.maxHeight,
+                        width: constraints.maxWidth,
+                        child: _ServiceMap(
+                          localizations: localizations,
+                          onOrderTap: openOrderSheet,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           );
@@ -194,32 +181,6 @@ class _ServiceMapState extends State<_ServiceMap> {
           ],
         );
       },
-    );
-  }
-}
-
-class _MapControl extends StatelessWidget {
-  const _MapControl({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 46,
-      height: 46,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x18000000),
-            blurRadius: 14,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Icon(icon, color: const Color(0xFF2E3B40), size: 21),
     );
   }
 }
