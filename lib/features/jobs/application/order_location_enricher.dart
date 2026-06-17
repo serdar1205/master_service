@@ -7,7 +7,7 @@ class OrderLocationEnricher {
   final OrdersRepository _repository;
 
   Future<JobListItem> enrich(JobListItem job) async {
-    if (_hasMapData(job)) {
+    if (_hasMapData(job) && _hasPhone(job)) {
       return job;
     }
 
@@ -29,6 +29,9 @@ class OrderLocationEnricher {
         clientName: details.clientName.isNotEmpty
             ? details.clientName
             : job.clientName,
+        clientPhone: details.clientPhone.isNotEmpty
+            ? details.clientPhone
+            : job.clientPhone,
       );
     } on Object {
       return job;
@@ -48,5 +51,9 @@ class OrderLocationEnricher {
         job.longitude != null &&
         job.clientName != null &&
         job.clientName!.isNotEmpty;
+  }
+
+  bool _hasPhone(JobListItem job) {
+    return job.clientPhone != null && job.clientPhone!.isNotEmpty;
   }
 }

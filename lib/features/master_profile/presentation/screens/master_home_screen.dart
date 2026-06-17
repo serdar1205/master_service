@@ -15,6 +15,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../../jobs/domain/order_models.dart';
+import '../../../jobs/presentation/utils/call_client_action.dart';
 import '../../../map/application/map_marker_utils.dart';
 import '../../application/home_cubit.dart';
 
@@ -615,7 +616,7 @@ class _CurrentJobCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () => callClientForJob(context, job),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: MasterHomeScreen._brandColor,
                         minimumSize: const Size(58, 48),

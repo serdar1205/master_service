@@ -17,6 +17,7 @@ class OrderMapper {
       category: category,
       title: _truncate(description.isNotEmpty ? description : category, 48),
       clientName: json['client_name'] as String?,
+      clientPhone: json['client_phone'] as String?,
       address: json['address'] as String? ?? '',
       priceText: '—',
       statusKey: _statusKey(status),

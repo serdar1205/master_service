@@ -9,7 +9,9 @@ import '../../../../app/localization/locale_cubit.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/media/image_pick_service.dart';
+import '../../../../core/config/app_config.dart';
 import '../../../../core/utils/app_status.dart';
+import '../../../../core/utils/phone_launcher.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/di/app_repositories.dart';
@@ -415,7 +417,12 @@ class _PriceConfirmationCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           FilledButton.icon(
-            onPressed: () {},
+            onPressed: () => PhoneLauncher.call(
+              context,
+              AppConfig.supportPhone,
+              unavailableMessage: localizations.text('phoneUnavailable'),
+              failedMessage: localizations.text('callFailed'),
+            ),
             style: FilledButton.styleFrom(
               backgroundColor: _buttonColor,
               foregroundColor: Colors.white,

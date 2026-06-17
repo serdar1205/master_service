@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/utils/phone_launcher.dart';
 import '../../data/order_mapper.dart';
 import '../../domain/order_models.dart';
 
@@ -69,6 +70,12 @@ class OrderDetailsInfoCard extends StatelessWidget {
               icon: Icons.phone_outlined,
               label: localizations.text('phoneNumber'),
               value: details.clientPhone,
+              onTap: () => PhoneLauncher.call(
+                context,
+                details.clientPhone,
+                unavailableMessage: localizations.text('phoneUnavailable'),
+                failedMessage: localizations.text('callFailed'),
+              ),
             ),
           ],
           if (details.address.isNotEmpty) ...[
@@ -218,15 +225,17 @@ class _InfoRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 18, color: const Color(0xFF6D7A82)),
@@ -246,15 +255,31 @@ class _InfoRow extends StatelessWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF293237),
+                  color: onTap == null ? const Color(0xFF293237) : AppColors.brand,
                   fontWeight: FontWeight.w600,
                   height: 1.35,
+                  decoration: onTap == null ? null : TextDecoration.underline,
                 ),
               ),
             ],
           ),
         ),
+        if (onTap != null)
+          const Icon(Icons.call_outlined, size: 18, color: AppColors.brand),
       ],
+    );
+
+    if (onTap == null) {
+      return content;
+    }
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: content,
+      ),
     );
   }
 }

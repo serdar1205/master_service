@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../core/config/app_config.dart';
+import '../../../../core/utils/phone_launcher.dart';
 
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
@@ -28,8 +30,13 @@ class SupportScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.call_outlined),
             title: Text(l10n.text('callSupport')),
-            subtitle: const Text('+993 12 00 00 00'),
-            onTap: () {},
+            subtitle: Text(AppConfig.supportPhone),
+            onTap: () => PhoneLauncher.call(
+              context,
+              AppConfig.supportPhone,
+              unavailableMessage: l10n.text('phoneUnavailable'),
+              failedMessage: l10n.text('callFailed'),
+            ),
           ),
         ],
       ),

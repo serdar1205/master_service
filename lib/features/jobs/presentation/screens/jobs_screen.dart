@@ -18,6 +18,7 @@ import '../../../../app/di/app_repositories.dart';
 import '../../../map/application/map_marker_utils.dart';
 import '../../application/jobs_cubit.dart';
 import '../../domain/orders_filter.dart';
+import '../utils/call_client_action.dart';
 
 class JobsScreen extends StatelessWidget {
   const JobsScreen({super.key});
@@ -229,7 +230,12 @@ class JobsScreen extends StatelessWidget {
                                             );
                                           }
                                         },
-                                        onSecondaryAction: () {},
+                                        onSecondaryAction: i % 3 == 1
+                                            ? () {}
+                                            : () => callClientForJob(
+                                                context,
+                                                jobs[i],
+                                              ),
                                       ),
                                       if (i != jobs.length - 1)
                                         const SizedBox(height: 14),

@@ -167,6 +167,8 @@ class AppLocalizations {
       'errorDefaultMessage':
           'Maglumat ýüklenip bilinmedi. Internet baglanyşygyny barlaň we täzeden synanyşyň.',
       'retryAction': 'Täzeden synanyş',
+      'phoneUnavailable': 'Telefon belgisi ýok',
+      'callFailed': 'Jaň edip bolmady',
       'goHomeAction': 'Baş sahypa',
       'navigationErrorTitle': 'Sahypa açylp bilinmedi',
       'navigationErrorMessage':
@@ -322,6 +324,8 @@ class AppLocalizations {
       'errorDefaultMessage':
           'Не удалось загрузить данные. Проверьте интернет и попробуйте снова.',
       'retryAction': 'Повторить',
+      'phoneUnavailable': 'Номер телефона недоступен',
+      'callFailed': 'Не удалось совершить звонок',
       'goHomeAction': 'На главную',
       'navigationErrorTitle': 'Не удалось открыть страницу',
       'navigationErrorMessage':

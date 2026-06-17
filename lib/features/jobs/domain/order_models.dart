@@ -13,6 +13,7 @@ class JobListItem {
     this.latitude,
     this.longitude,
     this.clientName,
+    this.clientPhone,
   });
 
   final String id;
@@ -28,6 +29,7 @@ class JobListItem {
   final double? latitude;
   final double? longitude;
   final String? clientName;
+  final String? clientPhone;
 }
 
 class JobsDashboardData {

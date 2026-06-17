@@ -26,6 +26,11 @@ class AppConfig {
   /// Ashgabat — used when jobs and device location are unavailable.
   static const mapDefaultCenter = LatLng(37.9415, 58.3794);
 
+  static const supportPhone = String.fromEnvironment(
+    'SUPPORT_PHONE',
+    defaultValue: '+99312000000',
+  );
+
   static const requestTimeout = Duration(seconds: 30);
   static const requireRuntimeConfig = bool.fromEnvironment(
     'REQUIRE_RUNTIME_CONFIG',
