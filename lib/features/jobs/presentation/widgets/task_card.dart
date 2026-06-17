@@ -46,8 +46,7 @@ class TaskCard extends StatelessWidget {
           Text(
             task.title,
             style: theme.textTheme.titleSmall?.copyWith(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
             ),
           ),
           if (task.description.isNotEmpty) ...[
@@ -55,7 +54,6 @@ class TaskCard extends StatelessWidget {
             Text(
               task.description,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 13,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 height: 1.35,
               ),

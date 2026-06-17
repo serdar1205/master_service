@@ -130,7 +130,7 @@ class JobsScreen extends StatelessWidget {
                                         .headlineSmall
                                         ?.copyWith(
                                           color: const Color(0xFF101719),
-                                          fontWeight: FontWeight.w900,
+                                          fontWeight: FontWeight.w700,
                                         ),
                                   ),
                                   const SizedBox(height: 4),
@@ -301,7 +301,7 @@ class _OrdersHeader extends StatelessWidget {
               localizations.text('appTitle'),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: JobsScreen._brandColor,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -424,7 +424,7 @@ class _StatCard extends StatelessWidget {
                 value,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: foregroundColor,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
@@ -508,7 +508,7 @@ class _OrderCard extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: const Color(0xFF11191C),
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     height: 1.12,
                   ),
                 ),
@@ -546,7 +546,7 @@ class _OrderCard extends StatelessWidget {
                                 side: const BorderSide(
                                   color: JobsScreen._brandColor,
                                 ),
-                                minimumSize: const Size.fromHeight(43),
+                                minimumSize: const Size(0, 43),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5),
                                 ),
@@ -554,7 +554,7 @@ class _OrderCard extends StatelessWidget {
                               child: Text(
                                 actionLabel,
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             )
@@ -563,7 +563,7 @@ class _OrderCard extends StatelessWidget {
                               style: FilledButton.styleFrom(
                                 backgroundColor: JobsScreen._buttonColor,
                                 foregroundColor: Colors.white,
-                                minimumSize: const Size.fromHeight(43),
+                                minimumSize: const Size(0, 43),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5),
                                 ),
@@ -571,7 +571,7 @@ class _OrderCard extends StatelessWidget {
                               child: Text(
                                 actionLabel,
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -642,7 +642,7 @@ class _OrderPhoto extends StatelessWidget {
                 price,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

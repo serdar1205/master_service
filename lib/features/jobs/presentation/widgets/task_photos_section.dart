@@ -82,7 +82,7 @@ class TaskPhotosSection extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: _brandColor,
                       side: const BorderSide(color: _brandColor),
-                      minimumSize: const Size.fromHeight(46),
+                      minimumSize: const Size(0, 46),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -100,7 +100,7 @@ class TaskPhotosSection extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: _buttonColor,
                       foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(46),
+                      minimumSize: const Size(0, 46),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

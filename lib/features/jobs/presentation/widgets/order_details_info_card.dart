@@ -108,7 +108,7 @@ class OrderDetailsInfoCard extends StatelessWidget {
                     details.finalPriceText!,
                     style: theme.titleMedium?.copyWith(
                       color: _brandColor,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

@@ -540,7 +540,7 @@ class _SignOutButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFFB3262E),
         backgroundColor: Colors.white,
-        minimumSize: const Size.fromHeight(62),
+        minimumSize: const Size(0, 62),
         side: const BorderSide(color: Color(0xFFF0D9DC)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         textStyle: Theme.of(

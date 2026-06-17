@@ -128,8 +128,7 @@ class _BottomNavItem extends StatelessWidget {
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: color,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                fontSize: 9,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],

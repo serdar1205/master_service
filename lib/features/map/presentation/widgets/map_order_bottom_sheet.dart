@@ -60,7 +60,7 @@ class MapOrderBottomSheet extends StatelessWidget {
                   localizations.text('orderNumber').replaceAll('{id}', orderId),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppColors.brand,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -92,7 +92,7 @@ class MapOrderBottomSheet extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.buttonTeal,
                       foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(52),
+                      minimumSize: const Size(0, 52),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),

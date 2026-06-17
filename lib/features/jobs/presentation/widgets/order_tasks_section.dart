@@ -87,7 +87,7 @@ class _OrderTaskCard extends StatelessWidget {
                   '$index',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: OrderTasksSection._brandColor,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),

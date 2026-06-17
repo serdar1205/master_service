@@ -131,7 +131,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                 onPressed: canSubmit ? _submit : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  minimumSize: const Size.fromHeight(48),
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

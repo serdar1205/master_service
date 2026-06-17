@@ -215,7 +215,7 @@ class _Greeting extends StatelessWidget {
                 localizations.homeGreetingFor(masterName),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: const Color(0xFF101719),
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   height: 1.05,
                 ),
               ),
@@ -240,7 +240,7 @@ class _Greeting extends StatelessWidget {
                   avatarLabel,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: const Color(0xFF3B70D8),
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
         ),
@@ -437,7 +437,7 @@ class _StatCard extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: foregroundColor,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
@@ -470,7 +470,7 @@ class _SectionHeader extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: const Color(0xFF101719),
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -551,7 +551,7 @@ class _CurrentJobCard extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
                                   color: const Color(0xFF11191C),
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.w700,
                                   height: 1.18,
                                 ),
                           ),
@@ -567,7 +567,7 @@ class _CurrentJobCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 color: MasterHomeScreen._brandColor,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                                 height: 1.1,
                               ),
                         ),
@@ -577,7 +577,7 @@ class _CurrentJobCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 color: const Color(0xFF4B5960),
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w700,
                               ),
                         ),
                       ],
@@ -596,12 +596,12 @@ class _CurrentJobCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: MasterHomeScreen._buttonColor,
                           foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(48),
+                          minimumSize: const Size(0, 48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(11),
                           ),
                           textStyle: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         child: Text(localizations.text(job.actionKey)),
                       ),
@@ -901,7 +901,7 @@ class _NewOrderCard extends StatelessWidget {
                       job.title,
                       style: const TextStyle(
                         color: Color(0xFF101719),
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -928,7 +928,7 @@ class _NewOrderCard extends StatelessWidget {
                   localizations.text('newOrder'),
                   style: const TextStyle(
                     color: Color(0xFF101719),
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -944,7 +944,7 @@ class _NewOrderCard extends StatelessWidget {
                   job.priceText,
                   style: const TextStyle(
                     color: MasterHomeScreen._brandColor,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -964,7 +964,7 @@ class _NewOrderCard extends StatelessWidget {
                 child: Text(
                   localizations.text(job.actionKey),
                   style: const TextStyle(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
                 ),

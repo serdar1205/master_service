@@ -154,20 +154,18 @@ class _LoginCard extends StatelessWidget {
             Text(
               localizations.text('phoneLoginTitle'),
               textAlign: TextAlign.center,
-              style: theme.textTheme.headlineSmall?.copyWith(
+              style: theme.textTheme.headlineMedium?.copyWith(
                 color: const Color(0xFF171717),
-                fontWeight: FontWeight.w900,
-                fontSize: 29,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               localizations.text('phoneLoginSubtitle'),
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: const Color(0xFF424C52),
-                height: 1.35,
-                fontSize: 16,
+                height: 1.4,
               ),
             ),
             const SizedBox(height: 34),
@@ -200,7 +198,7 @@ class _LoginCard extends StatelessWidget {
                 foregroundColor: Colors.white,
                 elevation: 8,
                 shadowColor: AppColors.buttonTeal.withValues(alpha: 0.18),
-                minimumSize: const Size.fromHeight(54),
+                minimumSize: const Size(0, 54),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),

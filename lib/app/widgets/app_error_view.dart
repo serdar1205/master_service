@@ -91,7 +91,7 @@ class AppErrorView extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.buttonTeal,
                         foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(50),
+                        minimumSize: const Size(0, 50),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),

@@ -152,7 +152,7 @@ class _JobDetailsContentState extends State<_JobDetailsContent> {
                             style: FilledButton.styleFrom(
                               backgroundColor: _buttonColor,
                               foregroundColor: Colors.white,
-                              minimumSize: const Size.fromHeight(50),
+                              minimumSize: const Size(0, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -277,7 +277,7 @@ class _DetailsHeader extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: _brandColor,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -399,7 +399,7 @@ class _PriceConfirmationCard extends StatelessWidget {
               details.finalPriceText!,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: _brandColor,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
