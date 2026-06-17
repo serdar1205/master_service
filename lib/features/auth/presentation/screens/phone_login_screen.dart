@@ -38,7 +38,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
               child: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, state) {
                   return ListView(
-                    padding: const EdgeInsets.fromLTRB(22, 92, 22, 24),
+                    padding: const EdgeInsets.fromLTRB(22, 20, 22, 10),
                     children: [
                       _LoginCard(
                         localizations: localizations,
@@ -47,12 +47,12 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                         brandColor: brandColor,
                         onSubmit: () => _submit(context),
                       ),
-                      const SizedBox(height: 36),
+                      const SizedBox(height: 20),
                       _TrustBadges(
                         localizations: localizations,
                         brandColor: brandColor,
                       ),
-                      const SizedBox(height: 132),
+                      const SizedBox(height: 20),
                       Text(
                         localizations.text('copyright'),
                         textAlign: TextAlign.center,
@@ -147,7 +147,7 @@ class _LoginCard extends StatelessWidget {
         side: const BorderSide(color: Color(0xFFE7EEF0)),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(38, 38, 38, 36),
+        padding: const EdgeInsets.fromLTRB(28, 28, 28, 26),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
