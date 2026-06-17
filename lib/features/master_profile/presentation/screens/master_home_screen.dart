@@ -355,39 +355,42 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: _StatCard(
-            value: activeCount,
-            label: localizations.text('active'),
-            icon: Icons.work_history_outlined,
-            backgroundColor: MasterHomeScreen._brandColor,
-            foregroundColor: Colors.white,
-            borderColor: MasterHomeScreen._brandColor,
-          ),
+        _StatCard(
+          value: earningsCount,
+          label: localizations.text('earnings'),
+          icon: Icons.account_balance_wallet_outlined,
+          backgroundColor: const Color(0xFFD9E8FF),
+          foregroundColor: const Color(0xFF3B629B),
+          borderColor: const Color(0xFF9DBAEA),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _StatCard(
-            value: completedCount,
-            label: localizations.text('completed'),
-            icon: Icons.check_circle_outline,
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF1B2327),
-            borderColor: const Color(0xFFD7E0E3),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _StatCard(
-            value: earningsCount,
-            label: localizations.text('earnings'),
-            icon: Icons.account_balance_wallet_outlined,
-            backgroundColor: const Color(0xFFD9E8FF),
-            foregroundColor: const Color(0xFF3B629B),
-            borderColor: const Color(0xFF9DBAEA),
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                value: activeCount,
+                label: localizations.text('active'),
+                icon: Icons.work_history_outlined,
+                backgroundColor: MasterHomeScreen._brandColor,
+                foregroundColor: Colors.white,
+                borderColor: MasterHomeScreen._brandColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _StatCard(
+                value: completedCount,
+                label: localizations.text('completed'),
+                icon: Icons.check_circle_outline,
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF1B2327),
+                borderColor: const Color(0xFFD7E0E3),
+              ),
+            ),
+          ],
         ),
       ],
     );
