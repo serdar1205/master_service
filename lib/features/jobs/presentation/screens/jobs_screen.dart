@@ -11,9 +11,11 @@ import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_badge.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/widgets/orders_refresh_listener.dart';
+import '../../../../app/widgets/order_map_preview.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
+import '../../../map/application/map_marker_utils.dart';
 import '../../application/jobs_cubit.dart';
 import '../../domain/orders_filter.dart';
 
@@ -184,29 +186,24 @@ class JobsScreen extends StatelessWidget {
                                   else
                                     for (var i = 0; i < jobs.length; i++) ...[
                                       _OrderCard(
+                                        orderId: jobs[i].id,
                                         category: jobs[i].category,
                                         title: jobs[i].title,
                                         address: jobs[i].address,
                                         price: jobs[i].priceText,
+                                        latitude: jobs[i].latitude,
+                                        longitude: jobs[i].longitude,
+                                        clientInitial: clientInitialFromName(
+                                          jobs[i].clientName ?? '',
+                                        ),
                                         status: localizations.text(
                                           jobs[i].statusKey,
                                         ),
                                         actionLabel: localizations.text(
                                           jobs[i].actionKey,
                                         ),
-                                        accentIcon: switch (i % 3) {
-                                          0 => Icons.electrical_services,
-                                          1 => Icons.plumbing,
-                                          _ => Icons.air,
-                                        },
-                                        photoColor: switch (i % 3) {
-                                          0 => const Color(0xFF94A69A),
-                                          1 => const Color(0xFF8FBEC1),
-                                          _ => const Color(0xFFAFC8C3),
-                                        },
-                                        secondaryIcon: jobs[i].isHistory
-                                            ? Icons.description_outlined
-                                            : i % 3 == 1
+                                        showSecondaryAction: !jobs[i].isHistory,
+                                        secondaryIcon: i % 3 == 1
                                             ? Icons.chat_bubble_outline
                                             : Icons.phone_outlined,
                                         outlinedPrimary:
@@ -444,29 +441,35 @@ class _StatCard extends StatelessWidget {
 
 class _OrderCard extends StatelessWidget {
   const _OrderCard({
+    required this.orderId,
     required this.category,
     required this.title,
     required this.address,
     required this.price,
+    required this.clientInitial,
     required this.status,
     required this.actionLabel,
-    required this.accentIcon,
-    required this.photoColor,
     required this.onPrimaryAction,
     required this.onSecondaryAction,
+    this.latitude,
+    this.longitude,
+    this.showSecondaryAction = true,
     this.secondaryIcon = Icons.phone_outlined,
     this.outlinedPrimary = false,
   });
 
+  final String orderId;
   final String category;
   final String title;
   final String address;
   final String price;
+  final String clientInitial;
+  final double? latitude;
+  final double? longitude;
   final String status;
   final String actionLabel;
-  final IconData accentIcon;
+  final bool showSecondaryAction;
   final IconData secondaryIcon;
-  final Color photoColor;
   final VoidCallback onPrimaryAction;
   final VoidCallback onSecondaryAction;
   final bool outlinedPrimary;
@@ -490,7 +493,15 @@ class _OrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _OrderPhoto(price: price, color: photoColor, accentIcon: accentIcon),
+          OrderMapPreview(
+            orderId: orderId,
+            latitude: latitude,
+            longitude: longitude,
+            clientInitial: clientInitial,
+            height: 108,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            topRight: orderMapPriceBadge(price),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
             child: Column(
@@ -576,12 +587,14 @@ class _OrderCard extends StatelessWidget {
                               ),
                             ),
                     ),
-                    const SizedBox(width: 12),
-                    IconButton(
-                      onPressed: onSecondaryAction,
-                      color: JobsScreen._brandColor,
-                      icon: Icon(secondaryIcon),
-                    ),
+                    if (showSecondaryAction) ...[
+                      const SizedBox(width: 12),
+                      IconButton(
+                        onPressed: onSecondaryAction,
+                        color: JobsScreen._brandColor,
+                        icon: Icon(secondaryIcon),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -590,147 +603,6 @@ class _OrderCard extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _OrderPhoto extends StatelessWidget {
-  const _OrderPhoto({
-    required this.price,
-    required this.color,
-    required this.accentIcon,
-  });
-
-  final String price;
-  final Color color;
-  final IconData accentIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 108,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _PhotoPainter(baseColor: color, accentIcon: accentIcon),
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.02),
-                    Colors.black.withValues(alpha: 0.12),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 10,
-            right: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-              decoration: BoxDecoration(
-                color: JobsScreen._brandColor,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                price,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoPainter extends CustomPainter {
-  const _PhotoPainter({required this.baseColor, required this.accentIcon});
-
-  final Color baseColor;
-  final IconData accentIcon;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final backgroundPaint = Paint()..color = baseColor;
-    canvas.drawRect(Offset.zero & size, backgroundPaint);
-
-    final wallPaint = Paint()..color = Colors.white.withValues(alpha: 0.26);
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height * 0.52),
-      wallPaint,
-    );
-
-    final floorPaint = Paint()..color = Colors.black.withValues(alpha: 0.08);
-    canvas.drawRect(
-      Rect.fromLTWH(0, size.height * 0.52, size.width, size.height * 0.48),
-      floorPaint,
-    );
-
-    final circlePaint = Paint()..color = Colors.white.withValues(alpha: 0.32);
-    canvas.drawCircle(
-      Offset(size.width * 0.28, size.height * 0.55),
-      34,
-      circlePaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.73, size.height * 0.46),
-      42,
-      circlePaint,
-    );
-
-    final personPaint = Paint()..color = const Color(0xFF2C3E46);
-    canvas.drawCircle(
-      Offset(size.width * 0.34, size.height * 0.34),
-      12,
-      personPaint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.27, size.height * 0.45, 52, 58),
-        const Radius.circular(14),
-      ),
-      personPaint,
-    );
-
-    final toolPaint = Paint()
-      ..color = const Color(0xFFEEF6F7)
-      ..strokeWidth = 7
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-      Offset(size.width * 0.48, size.height * 0.52),
-      Offset(size.width * 0.76, size.height * 0.32),
-      toolPaint,
-    );
-
-    final iconPainter = TextPainter(
-      text: TextSpan(
-        text: String.fromCharCode(accentIcon.codePoint),
-        style: TextStyle(
-          fontSize: 32,
-          fontFamily: accentIcon.fontFamily,
-          package: accentIcon.fontPackage,
-          color: Colors.white.withValues(alpha: 0.76),
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    iconPainter.paint(canvas, Offset(size.width * 0.08, size.height * 0.12));
-  }
-
-  @override
-  bool shouldRepaint(_PhotoPainter oldDelegate) {
-    return oldDelegate.baseColor != baseColor ||
-        oldDelegate.accentIcon != accentIcon;
   }
 }
 

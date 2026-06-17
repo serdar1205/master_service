@@ -16,6 +16,7 @@ class OrderMapper {
       id: '${json['id']}',
       category: category,
       title: _truncate(description.isNotEmpty ? description : category, 48),
+      clientName: json['client_name'] as String?,
       address: json['address'] as String? ?? '',
       priceText: '—',
       statusKey: _statusKey(status),

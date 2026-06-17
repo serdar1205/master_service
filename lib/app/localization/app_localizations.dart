@@ -33,6 +33,7 @@ class AppLocalizations {
       'otpSubtitle': 'Telefon belgiňize gelen kody giriziň.',
       'otpCode': 'OTP kody',
       'verify': 'Tassyklamak',
+      'resendOtp': 'Kody täzeden iber',
       'profileSetupTitle': 'Profil maglumatlary',
       'profileSetupSubtitle':
           'Adyňyz, familiýaňyz we şäheriňiz API bilen doldurylar.',
@@ -189,6 +190,7 @@ class AppLocalizations {
       'otpSubtitle': 'Введите код, отправленный на ваш телефон.',
       'otpCode': 'OTP-код',
       'verify': 'Подтвердить',
+      'resendOtp': 'Отправить код повторно',
       'profileSetupTitle': 'Профиль мастера',
       'profileSetupSubtitle':
           'Имя, фамилия и город будут заполняться через API.',

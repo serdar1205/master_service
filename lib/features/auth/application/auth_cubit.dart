@@ -151,6 +151,44 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> resendOtp() async {
+    final phoneNumber = state.phoneNumber;
+    if (phoneNumber == null || phoneNumber.isEmpty) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: 'Enter your phone number again.',
+        ),
+      );
+      return;
+    }
+
+    emit(state.copyWith(status: AuthStatus.requestingOtp, clearError: true));
+
+    try {
+      await _authRepository.requestOtp(phoneNumber);
+      emit(
+        AuthState(status: AuthStatus.otpRequested, phoneNumber: phoneNumber),
+      );
+    } on Object catch (error) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.otpRequested,
+          errorMessage: _friendlyAuthError(error),
+        ),
+      );
+    }
+  }
+
+  void backToLogin() {
+    emit(
+      AuthState(
+        status: AuthStatus.unauthenticated,
+        phoneNumber: state.phoneNumber,
+      ),
+    );
+  }
+
   Future<void> completeProfile() async {
     final session = await _authRepository.markProfileComplete();
     emit(

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_status.dart';
+import '../../jobs/application/order_location_enricher.dart';
 import '../../jobs/domain/orders_repository.dart';
 import '../../settings/domain/profile_repository.dart';
 import '../data/local_home_repository.dart';
@@ -12,16 +13,21 @@ class HomeCubit extends Cubit<HomeState> {
     required OrdersRepository ordersRepository,
   }) : _profileRepository = profileRepository,
        _ordersRepository = ordersRepository,
+       _locationEnricher = OrderLocationEnricher(ordersRepository),
        super(const HomeState.initial());
 
   final ProfileRepository _profileRepository;
   final OrdersRepository _ordersRepository;
+  final OrderLocationEnricher _locationEnricher;
 
   Future<void> load() async {
     emit(state.copyWith(status: AppStatus.loading, clearError: true));
     try {
       final profile = await _profileRepository.fetchProfile();
       final dashboard = await _ordersRepository.fetchDashboard();
+      final activeJobs = await _locationEnricher.enrichAll(
+        dashboard.activeJobs,
+      );
 
       emit(
         state.copyWith(
@@ -38,7 +44,7 @@ class HomeCubit extends Cubit<HomeState> {
               ),
               HomeStat(value: '${profile.balance} TMT', labelKey: 'earnings'),
             ],
-            activeJobs: dashboard.activeJobs,
+            activeJobs: activeJobs,
           ),
         ),
       );

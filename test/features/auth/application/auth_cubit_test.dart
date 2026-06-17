@@ -91,6 +91,27 @@ void main() {
     expect(cubit.state.status, AuthStatus.authenticated);
   });
 
+  test('backToLogin returns to unauthenticated state', () async {
+    final cubit = AuthCubit(_FakeAuthRepository());
+    await cubit.requestOtp('+99361000000');
+
+    cubit.backToLogin();
+
+    expect(cubit.state.status, AuthStatus.unauthenticated);
+    expect(cubit.state.phoneNumber, '+99361000000');
+  });
+
+  test('resendOtp keeps otpRequested state on success', () async {
+    final cubit = AuthCubit(_FakeAuthRepository());
+    await cubit.requestOtp('+99361000000');
+
+    await cubit.resendOtp();
+
+    expect(cubit.state.status, AuthStatus.otpRequested);
+    expect(cubit.state.phoneNumber, '+99361000000');
+    expect(cubit.state.errorMessage, isNull);
+  });
+
   test('handleSessionExpired clears session and signs out', () async {
     final repository = _FakeAuthRepository();
     final cubit = AuthCubit(repository);

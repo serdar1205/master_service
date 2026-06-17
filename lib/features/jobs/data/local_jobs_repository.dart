@@ -23,6 +23,9 @@ class LocalJobsRepository {
           distanceText: '2.5 km',
           isOutlinedAction: false,
           isHistory: false,
+          clientName: 'Merdan',
+          latitude: 37.9438,
+          longitude: 58.362,
         ),
       ],
       historyJobs: [
@@ -51,6 +54,9 @@ class LocalJobsRepository {
           distanceText: '2.5 km',
           isOutlinedAction: false,
           isHistory: false,
+          clientName: 'Merdan',
+          latitude: 37.9438,
+          longitude: 58.362,
         ),
         JobListItem(
           id: 'job-h1',
@@ -79,6 +85,8 @@ class LocalJobsRepository {
       description: 'Suw akmasyny düzetmek',
       beforePhotos: [_jobImageUrl, null],
       afterPhotos: [_jobImageUrl, null],
+      latitude: 37.9415,
+      longitude: 58.3794,
       tasks: [],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/utils/app_status.dart';
+import '../application/order_location_enricher.dart';
 import '../domain/order_models.dart';
 import '../domain/orders_filter.dart';
 import '../domain/orders_repository.dart';
@@ -46,15 +47,20 @@ class JobsState {
 }
 
 class JobsCubit extends Cubit<JobsState> {
-  JobsCubit(this._repository) : super(const JobsState.initial());
+  JobsCubit(this._repository)
+    : _locationEnricher = OrderLocationEnricher(_repository),
+      super(const JobsState.initial());
 
   final OrdersRepository _repository;
+  final OrderLocationEnricher _locationEnricher;
 
   Future<void> load() async {
     emit(state.copyWith(status: AppStatus.loading, clearError: true));
     try {
       final dashboard = await _repository.fetchDashboard();
-      final jobs = await _repository.fetchOrders(filter: state.filter.apiValue);
+      final jobs = await _locationEnricher.enrichAll(
+        await _repository.fetchOrders(filter: state.filter.apiValue),
+      );
       emit(
         state.copyWith(
           status: AppStatus.success,
@@ -85,7 +91,9 @@ class JobsCubit extends Cubit<JobsState> {
       ),
     );
     try {
-      final jobs = await _repository.fetchOrders(filter: filter.apiValue);
+      final jobs = await _locationEnricher.enrichAll(
+        await _repository.fetchOrders(filter: filter.apiValue),
+      );
       emit(state.copyWith(status: AppStatus.success, jobs: jobs));
     } on Object catch (error) {
       emit(
@@ -102,7 +110,9 @@ class JobsCubit extends Cubit<JobsState> {
     try {
       await _repository.startOrder(orderId);
       final dashboard = await _repository.fetchDashboard();
-      final jobs = await _repository.fetchOrders(filter: state.filter.apiValue);
+      final jobs = await _locationEnricher.enrichAll(
+        await _repository.fetchOrders(filter: state.filter.apiValue),
+      );
       emit(
         state.copyWith(
           status: AppStatus.success,

@@ -12,6 +12,7 @@ class JobListItem {
     required this.isHistory,
     this.latitude,
     this.longitude,
+    this.clientName,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class JobListItem {
   final bool isHistory;
   final double? latitude;
   final double? longitude;
+  final String? clientName;
 }
 
 class JobsDashboardData {

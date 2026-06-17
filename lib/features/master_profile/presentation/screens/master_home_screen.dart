@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
-import 'package:latlong2/latlong.dart';
 import 'dart:ui';
 
 import '../../../../app/localization/app_localizations.dart';
@@ -12,11 +10,12 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
+import '../../../../app/widgets/order_map_preview.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
-import '../../../../app/widgets/app_map_tile_layer.dart';
 import '../../../jobs/domain/order_models.dart';
+import '../../../map/application/map_marker_utils.dart';
 import '../../application/home_cubit.dart';
 
 class MasterHomeScreen extends StatelessWidget {
@@ -514,7 +513,7 @@ class _CurrentJobCard extends StatelessWidget {
   const _CurrentJobCard({required this.localizations, required this.job});
 
   final AppLocalizations localizations;
-  final _CurrentJobVm job;
+  final JobListItem job;
 
   @override
   Widget build(BuildContext context) {
@@ -534,7 +533,12 @@ class _CurrentJobCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _MapPreview(localizations: localizations),
+          OrderMapPreview(
+            orderId: job.id,
+            latitude: job.latitude,
+            longitude: job.longitude,
+            clientInitial: clientInitialFromName(job.clientName ?? ''),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(
@@ -595,7 +599,7 @@ class _CurrentJobCard extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () =>
-                            context.go(AppRoutes.jobDetailsPath(job.jobId)),
+                            context.go(AppRoutes.jobDetailsPath(job.id)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: MasterHomeScreen._buttonColor,
                           foregroundColor: Colors.white,
@@ -656,154 +660,10 @@ class _CurrentJobsSlider extends StatelessWidget {
           final width = MediaQuery.sizeOf(context).width - 44;
           return SizedBox(
             width: width.clamp(280.0, 420.0),
-            child: _CurrentJobCard(
-              localizations: localizations,
-              job: _CurrentJobVm(
-                jobId: job.id,
-                category: job.category,
-                title: job.title,
-                priceText: job.priceText,
-                address: job.address,
-                actionKey: job.actionKey,
-              ),
-            ),
+            child: _CurrentJobCard(localizations: localizations, job: job),
           );
         },
       ),
-    );
-  }
-}
-
-class _CurrentJobVm {
-  const _CurrentJobVm({
-    required this.jobId,
-    required this.category,
-    required this.title,
-    required this.priceText,
-    required this.address,
-    required this.actionKey,
-  });
-
-  final String jobId;
-  final String category;
-  final String title;
-  final String priceText;
-  final String address;
-  final String actionKey;
-}
-
-class _MapPreview extends StatelessWidget {
-  const _MapPreview({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 144,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: IgnorePointer(
-                child: FlutterMap(
-                  options: const MapOptions(
-                    initialCenter: LatLng(37.938, 58.385),
-                    initialZoom: 13.2,
-                  ),
-                  children: [const AppMapTileLayer()],
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: ColoredBox(color: Colors.black.withValues(alpha: 0.06)),
-            ),
-            const Positioned(
-              left: 99,
-              top: 72,
-              child: _MapPin(
-                icon: Icons.handyman_outlined,
-                backgroundColor: Colors.white,
-                iconColor: MasterHomeScreen._brandColor,
-              ),
-            ),
-            Positioned(
-              right: 71,
-              top: 30,
-              child: Column(
-                children: [
-                  const _MapPin(
-                    icon: Icons.person_outline,
-                    backgroundColor: MasterHomeScreen._brandColor,
-                    iconColor: Colors.white,
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      localizations.text('customer'),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: const Color(0xFF101719),
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 18,
-              bottom: 14,
-              child: FilledButton.icon(
-                onPressed: () {},
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF101719),
-                  elevation: 3,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                icon: const Icon(Icons.map_outlined, size: 20),
-                label: Text(
-                  localizations.text('openMap'),
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MapPin extends StatelessWidget {
-  const _MapPin({
-    required this.icon,
-    required this.backgroundColor,
-    required this.iconColor,
-  });
-
-  final IconData icon;
-  final Color backgroundColor;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor: backgroundColor,
-      child: Icon(icon, color: iconColor, size: 18),
     );
   }
 }
@@ -876,103 +736,119 @@ class _NewOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFD7E0E3)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 23,
-                backgroundColor: Color(0xFFE6FBF8),
-                child: Icon(
-                  Icons.bolt,
-                  color: MasterHomeScreen._brandColor,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          OrderMapPreview(
+            orderId: job.id,
+            latitude: job.latitude,
+            longitude: job.longitude,
+            clientInitial: clientInitialFromName(job.clientName ?? ''),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    Text(
-                      job.title,
-                      style: const TextStyle(
-                        color: Color(0xFF101719),
-                        fontWeight: FontWeight.w700,
+                    const CircleAvatar(
+                      radius: 23,
+                      backgroundColor: Color(0xFFE6FBF8),
+                      child: Icon(
+                        Icons.bolt,
+                        color: MasterHomeScreen._brandColor,
+                        size: 28,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      '${job.category} • ${job.address}',
-                      style: const TextStyle(
-                        color: Color(0xFF536167),
-                        fontSize: 12,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            job.title,
+                            style: const TextStyle(
+                              color: Color(0xFF101719),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${job.category} • ${job.address}',
+                            style: const TextStyle(
+                              color: Color(0xFF536167),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F3F4),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        localizations.text('newOrder'),
+                        style: const TextStyle(
+                          color: Color(0xFF101719),
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
+                const SizedBox(height: 14),
+                const Divider(color: Color(0xFFE2E8EA), height: 1),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        job.priceText,
+                        style: const TextStyle(
+                          color: MasterHomeScreen._brandColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: () =>
+                          context.go(AppRoutes.jobDetailsPath(job.id)),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF63D5DA),
+                        foregroundColor: const Color(0xFF083237),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
+                      ),
+                      child: Text(
+                        localizations.text(job.actionKey),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F3F4),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Text(
-                  localizations.text('newOrder'),
-                  style: const TextStyle(
-                    color: Color(0xFF101719),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const Divider(color: Color(0xFFE2E8EA), height: 1),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  job.priceText,
-                  style: const TextStyle(
-                    color: MasterHomeScreen._brandColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              FilledButton(
-                onPressed: () => context.go(AppRoutes.jobDetailsPath(job.id)),
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF63D5DA),
-                  foregroundColor: const Color(0xFF083237),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 10,
-                  ),
-                ),
-                child: Text(
-                  localizations.text(job.actionKey),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
