@@ -3,27 +3,27 @@ import 'package:flutter/material.dart';
 import '../localization/app_localizations.dart';
 import 'app_feedback_view.dart';
 
-class AppErrorView extends StatelessWidget {
-  const AppErrorView({
-    required this.message,
+class AppEmptyView extends StatelessWidget {
+  const AppEmptyView({
     this.title,
-    this.onRetry,
-    this.retryLabel,
+    this.message,
+    this.icon = Icons.inbox_rounded,
+    this.onAction,
+    this.actionLabel,
     this.secondaryLabel,
     this.onSecondary,
-    this.icon = Icons.cloud_off_rounded,
     this.compact = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
     super.key,
   });
 
-  final String message;
   final String? title;
-  final VoidCallback? onRetry;
-  final String? retryLabel;
+  final String? message;
+  final IconData icon;
+  final VoidCallback? onAction;
+  final String? actionLabel;
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
-  final IconData icon;
   final bool compact;
   final EdgeInsetsGeometry padding;
 
@@ -32,14 +32,12 @@ class AppErrorView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return AppFeedbackView(
-      title: title ?? l10n.text('errorTitle'),
-      message: message,
-      variant: AppFeedbackVariant.error,
+      title: title ?? l10n.text('emptySectionTitle'),
+      message: message ?? l10n.text('emptySectionMessage'),
+      variant: AppFeedbackVariant.empty,
       icon: icon,
-      onPrimary: onRetry,
-      primaryLabel: onRetry == null
-          ? null
-          : (retryLabel ?? l10n.text('retryAction')),
+      onPrimary: onAction,
+      primaryLabel: actionLabel,
       secondaryLabel: secondaryLabel,
       onSecondary: onSecondary,
       compact: compact,

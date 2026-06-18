@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_empty_view.dart';
+import '../../../../app/widgets/app_error_view.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../application/job_details_cubit.dart';
 import '../../domain/order_models.dart';
@@ -43,7 +45,7 @@ class _MyTasksSectionState extends State<MyTasksSection> {
         }
 
         if (state.status == AppStatus.failure && state.data == null) {
-          return _TasksError(
+          return AppErrorView(
             message:
                 state.errorMessage ??
                 widget.localizations.text('tasksLoadFailed'),
@@ -53,7 +55,8 @@ class _MyTasksSectionState extends State<MyTasksSection> {
                 context.read<JobDetailsCubit>().load(orderId);
               }
             },
-            localizations: widget.localizations,
+            compact: true,
+            padding: EdgeInsets.zero,
           );
         }
 
@@ -71,10 +74,16 @@ class _MyTasksSectionState extends State<MyTasksSection> {
             ),
             const SizedBox(height: 12),
             if (tasks.isEmpty)
-              _EmptyTasksState(
-                localizations: widget.localizations,
-                canEdit: widget.canEdit,
-                onAdd: () => _openAddTask(context),
+              AppEmptyView(
+                title: widget.localizations.text('addFirstTask'),
+                message: widget.localizations.text('emptySectionMessage'),
+                icon: Icons.assignment_outlined,
+                onAction: widget.canEdit ? () => _openAddTask(context) : null,
+                actionLabel: widget.canEdit
+                    ? widget.localizations.text('addTask')
+                    : null,
+                compact: true,
+                padding: EdgeInsets.zero,
               )
             else ...[
               for (var i = 0; i < tasks.length; i++) ...[
@@ -200,59 +209,6 @@ class _AddTaskButton extends StatelessWidget {
   }
 }
 
-class _EmptyTasksState extends StatelessWidget {
-  const _EmptyTasksState({
-    required this.localizations,
-    required this.canEdit,
-    required this.onAdd,
-  });
-
-  final AppLocalizations localizations;
-  final bool canEdit;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.assignment_outlined,
-            size: 40,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.35),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            localizations.text('addFirstTask'),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.55),
-            ),
-          ),
-          if (canEdit) ...[
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add),
-              label: Text(localizations.text('addTask')),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
 class _TasksSkeleton extends StatefulWidget {
   const _TasksSkeleton({required this.localizations});
 
@@ -332,32 +288,6 @@ class _ShimmerCard extends StatelessWidget {
           colors: [base, highlight, base],
         ),
       ),
-    );
-  }
-}
-
-class _TasksError extends StatelessWidget {
-  const _TasksError({
-    required this.message,
-    required this.onRetry,
-    required this.localizations,
-  });
-
-  final String message;
-  final VoidCallback onRetry;
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(message, textAlign: TextAlign.center),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: onRetry,
-          child: Text(localizations.text('retryAction')),
-        ),
-      ],
     );
   }
 }

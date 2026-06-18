@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_empty_view.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
@@ -176,6 +177,18 @@ class MasterHomeScreen extends StatelessWidget {
                                 _NewOrderCard(
                                   localizations: localizations,
                                   job: data.activeJobs.first,
+                                )
+                              else
+                                AppEmptyView(
+                                  title: localizations.text(
+                                    'emptyNewOrdersTitle',
+                                  ),
+                                  message: localizations.text(
+                                    'emptyNewOrdersMessage',
+                                  ),
+                                  icon: Icons.notifications_none_rounded,
+                                  compact: true,
+                                  padding: EdgeInsets.zero,
                                 ),
                             ]),
                           ),
@@ -647,7 +660,13 @@ class _CurrentJobsSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (jobs.isEmpty) {
-      return const SizedBox.shrink();
+      return AppEmptyView(
+        title: localizations.text('emptyCurrentJobsTitle'),
+        message: localizations.text('emptyCurrentJobsMessage'),
+        icon: Icons.handyman_outlined,
+        compact: true,
+        padding: EdgeInsets.zero,
+      );
     }
 
     return SizedBox(

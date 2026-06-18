@@ -173,6 +173,22 @@ class AppLocalizations {
       'navigationErrorTitle': 'Sahypa açylp bilinmedi',
       'navigationErrorMessage':
           'Bu bölüm elýeterli däl. Baş sahypa gaýdyp synanyşyň.',
+      'emptySectionTitle': 'Maglumat ýok',
+      'emptySectionMessage': 'Bu bölümde entek maglumat ýok.',
+      'emptyJobsTitle': 'Häzirlikçe iş ýok',
+      'emptyJobsMessage':
+          'Täze sargytlar gelende olar şu ýerde görner. Elýeterliligi açyk saklaň.',
+      'emptyHistoryTitle': 'Taryh boş',
+      'emptyHistoryMessage': 'Tamamlanan işleriňiz şu ýerde görkeziler.',
+      'emptyPaymentsTitle': 'Tölegler ýok',
+      'emptyPaymentsMessage':
+          'Töleg taryhy we balans maglumatlary ýakyn wagtda elýeterli bolar.',
+      'emptyCurrentJobsTitle': 'Häzirki iş ýok',
+      'emptyCurrentJobsMessage':
+          'Işe başlanyňyzda aktiw sargyt şu ýerde görner.',
+      'emptyNewOrdersTitle': 'Täze sargyt ýok',
+      'emptyNewOrdersMessage':
+          'Täze sargytlar gelende habar bereris. Soňra barlap görüň.',
       'placeholder': 'Bu bölüm API şertnamasy taýýar bolanda ösdüriler.',
     },
     'ru': {
@@ -330,6 +346,21 @@ class AppLocalizations {
       'navigationErrorTitle': 'Не удалось открыть страницу',
       'navigationErrorMessage':
           'Этот раздел недоступен. Вернитесь на главную и попробуйте снова.',
+      'emptySectionTitle': 'Нет данных',
+      'emptySectionMessage': 'В этом разделе пока нет информации.',
+      'emptyJobsTitle': 'Сейчас нет работ',
+      'emptyJobsMessage':
+          'Новые заявки появятся здесь, когда поступят. Держите доступность включённой.',
+      'emptyHistoryTitle': 'История пуста',
+      'emptyHistoryMessage': 'Завершённые работы будут отображаться здесь.',
+      'emptyPaymentsTitle': 'Выплат пока нет',
+      'emptyPaymentsMessage': 'История выплат и баланс скоро будут доступны.',
+      'emptyCurrentJobsTitle': 'Нет текущей работы',
+      'emptyCurrentJobsMessage':
+          'Активная заявка появится здесь, когда вы начнёте работу.',
+      'emptyNewOrdersTitle': 'Новых заявок нет',
+      'emptyNewOrdersMessage':
+          'Мы уведомим вас, когда поступят новые заявки. Загляните позже.',
       'placeholder': 'Раздел будет развит после готовности API-контракта.',
     },
   };

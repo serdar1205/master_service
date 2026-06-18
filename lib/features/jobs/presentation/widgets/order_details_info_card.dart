@@ -255,7 +255,9 @@ class _InfoRow extends StatelessWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: onTap == null ? const Color(0xFF293237) : AppColors.brand,
+                  color: onTap == null
+                      ? const Color(0xFF293237)
+                      : AppColors.brand,
                   fontWeight: FontWeight.w600,
                   height: 1.35,
                   decoration: onTap == null ? null : TextDecoration.underline,

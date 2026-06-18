@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/widgets/app_empty_view.dart';
 
 class PaymentsScreen extends StatelessWidget {
   const PaymentsScreen({super.key});
@@ -10,8 +11,17 @@ class PaymentsScreen extends StatelessWidget {
     final localizations = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(localizations.text('payments'))),
-      body: Center(child: Text(localizations.text('placeholder'))),
+      backgroundColor: const Color(0xFFF4FBFB),
+      appBar: AppBar(
+        title: Text(localizations.text('payments')),
+        backgroundColor: const Color(0xFFF4FBFB),
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: AppEmptyView(
+        title: localizations.text('emptyPaymentsTitle'),
+        message: localizations.text('emptyPaymentsMessage'),
+        icon: Icons.account_balance_wallet_outlined,
+      ),
     );
   }
 }

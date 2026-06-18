@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_empty_view.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_badge.dart';
@@ -169,19 +170,29 @@ class JobsScreen extends StatelessWidget {
                                       ),
                                     )
                                   else if (jobs.isEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 24,
-                                      ),
-                                      child: Text(
-                                        localizations.text('placeholder'),
-                                        textAlign: TextAlign.center,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(
-                                              color: const Color(0xFF6D7A82),
+                                    AppEmptyView(
+                                      title:
+                                          state.filter == OrdersFilter.history
+                                          ? localizations.text(
+                                              'emptyHistoryTitle',
+                                            )
+                                          : localizations.text(
+                                              'emptyJobsTitle',
                                             ),
+                                      message:
+                                          state.filter == OrdersFilter.history
+                                          ? localizations.text(
+                                              'emptyHistoryMessage',
+                                            )
+                                          : localizations.text(
+                                              'emptyJobsMessage',
+                                            ),
+                                      icon: state.filter == OrdersFilter.history
+                                          ? Icons.history_rounded
+                                          : Icons.work_outline_rounded,
+                                      compact: true,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
                                       ),
                                     )
                                   else

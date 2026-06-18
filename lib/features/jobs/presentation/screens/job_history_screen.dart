@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/router/app_routes.dart';
+import '../../../../app/widgets/app_empty_view.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../core/utils/app_status.dart';
@@ -48,7 +49,11 @@ class JobHistoryScreen extends StatelessWidget {
             if (jobs.isEmpty) {
               return AppRefreshableBody(
                 onRefresh: refreshHistory,
-                child: Center(child: Text(localizations.text('placeholder'))),
+                child: AppEmptyView(
+                  title: localizations.text('emptyHistoryTitle'),
+                  message: localizations.text('emptyHistoryMessage'),
+                  icon: Icons.history_rounded,
+                ),
               );
             }
 
@@ -118,12 +123,7 @@ class _HistoryCubit extends Cubit<_HistoryState> {
       final jobs = await _repository.fetchHistory();
       emit(state.copyWith(status: AppStatus.success, jobs: jobs));
     } on Object {
-      emit(
-        state.copyWith(
-          status: AppStatus.failure,
-          errorMessage: 'Taryh ýüklenip bilinmedi.',
-        ),
-      );
+      emit(state.copyWith(status: AppStatus.failure));
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
 import '../router/app_routes.dart';
+import '../theme/app_colors.dart';
 import 'app_error_view.dart';
 
 class AppErrorPage extends StatelessWidget {
@@ -16,7 +17,7 @@ class AppErrorPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FBFB),
+      backgroundColor: AppColors.kFFF4FBFB,
       body: SafeArea(
         child: AppErrorView(
           title: l10n.text('navigationErrorTitle'),
