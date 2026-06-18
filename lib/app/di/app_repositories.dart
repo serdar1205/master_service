@@ -45,6 +45,7 @@ class AppRepositories {
       realtimeClient: PusherReverbRealtimeClient(),
       tokenStorage: tokenStorage,
       ordersListRefreshNotifier: ordersListRefreshNotifier,
+      localeHolder: localeHolder,
     );
 
     return AppRepositories(

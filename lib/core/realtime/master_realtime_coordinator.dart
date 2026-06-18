@@ -1,8 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+
 import '../../features/jobs/application/orders_list_refresh_notifier.dart';
 import '../logging/app_logger.dart';
+import '../network/api_locale_holder.dart';
 import '../storage/secure_token_storage.dart';
+import '../widgets/app_toast.dart';
+import 'master_realtime_messages.dart';
 import 'pusher_reverb_realtime_client.dart';
 import 'realtime_event.dart';
 
@@ -12,15 +17,18 @@ class MasterRealtimeCoordinator {
     required PusherReverbRealtimeClient realtimeClient,
     required SecureTokenStorage tokenStorage,
     required OrdersListRefreshNotifier ordersListRefreshNotifier,
+    required ApiLocaleHolder localeHolder,
     AppLogger logger = const ConsoleAppLogger(),
   }) : _realtimeClient = realtimeClient,
        _tokenStorage = tokenStorage,
        _ordersListRefreshNotifier = ordersListRefreshNotifier,
+       _localeHolder = localeHolder,
        _logger = logger;
 
   final PusherReverbRealtimeClient _realtimeClient;
   final SecureTokenStorage _tokenStorage;
   final OrdersListRefreshNotifier _ordersListRefreshNotifier;
+  final ApiLocaleHolder _localeHolder;
   final AppLogger _logger;
 
   StreamSubscription<RealtimeEvent>? _eventsSubscription;
@@ -69,6 +77,13 @@ class MasterRealtimeCoordinator {
   void _handleEvent(RealtimeEvent event) {
     switch (event.type) {
       case RealtimeEventType.jobAssigned:
+        _ordersListRefreshNotifier.requestRefresh();
+        AppToast.showSuccess(
+          jobAssignedToastMessage(
+            locale: Locale(_localeHolder.localeCode),
+            payload: event.payload,
+          ),
+        );
       case RealtimeEventType.jobStatusChanged:
       case RealtimeEventType.newJob:
         _ordersListRefreshNotifier.requestRefresh();
