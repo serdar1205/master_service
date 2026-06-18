@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../categories/domain/service_category.dart';
+import '../../../categories/presentation/widgets/category_icon.dart';
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 
@@ -12,7 +14,7 @@ class ProfileCategoriesSection extends StatefulWidget {
   });
 
   final AppLocalizations localizations;
-  final List<String> categories;
+  final List<ServiceCategory> categories;
   final int collapsedPreviewCount;
 
   @override
@@ -24,15 +26,6 @@ class _ProfileCategoriesSectionState extends State<ProfileCategoriesSection> {
   static const _brandColor = AppColors.brand;
 
   bool _expanded = false;
-
-  static const _categoryIcons = <IconData>[
-    Icons.handyman_outlined,
-    Icons.plumbing_outlined,
-    Icons.electrical_services_outlined,
-    Icons.cleaning_services_outlined,
-    Icons.ac_unit_outlined,
-    Icons.format_paint_outlined,
-  ];
 
   static const _accentColors = <Color>[
     Color(0xFFEAF3FF),
@@ -155,8 +148,7 @@ class _ProfileCategoriesSectionState extends State<ProfileCategoriesSection> {
                         bottom: index == visibleCategories.length - 1 ? 0 : 8,
                       ),
                       child: _CategoryRow(
-                        label: category,
-                        icon: _categoryIcons[index % _categoryIcons.length],
+                        category: category,
                         backgroundColor:
                             _accentColors[index % _accentColors.length],
                         iconColor: _iconColors[index % _iconColors.length],
@@ -170,7 +162,7 @@ class _ProfileCategoriesSectionState extends State<ProfileCategoriesSection> {
                     alignment: WrapAlignment.start,
                     children: [
                       ...visibleCategories.map(
-                        (category) => _CategoryChip(label: category),
+                        (category) => _CategoryChip(category: category),
                       ),
                       if (hiddenCount > 0)
                         _MoreCategoriesChip(
@@ -205,14 +197,12 @@ class _ProfileCategoriesSectionState extends State<ProfileCategoriesSection> {
 
 class _CategoryRow extends StatelessWidget {
   const _CategoryRow({
-    required this.label,
-    required this.icon,
+    required this.category,
     required this.backgroundColor,
     required this.iconColor,
   });
 
-  final String label;
-  final IconData icon;
+  final ServiceCategory category;
   final Color backgroundColor;
   final Color iconColor;
 
@@ -241,12 +231,18 @@ class _CategoryRow extends StatelessWidget {
               color: backgroundColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Center(
+              child: CategoryIcon(
+                category: category,
+                size: 20,
+                color: iconColor,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              label,
+              category.name,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: const Color(0xFF242B2F),
                 fontWeight: FontWeight.w700,
@@ -265,9 +261,9 @@ class _CategoryRow extends StatelessWidget {
 }
 
 class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({required this.label});
+  const _CategoryChip({required this.category});
 
-  final String label;
+  final ServiceCategory category;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +275,7 @@ class _CategoryChip extends StatelessWidget {
         border: Border.all(color: const Color(0xFFDCE5E7)),
       ),
       child: Text(
-        label,
+        category.name,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
           color: const Color(0xFF4F79A3),
           fontWeight: FontWeight.w800,

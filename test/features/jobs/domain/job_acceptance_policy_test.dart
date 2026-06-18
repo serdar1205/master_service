@@ -8,12 +8,7 @@ import 'package:master_service/features/master_profile/domain/master_access.dart
 void main() {
   group('JobAcceptancePolicy', () {
     const city = City(id: 'ashgabat', nameTk: 'Aşgabat', nameRu: 'Ашхабад');
-    const category = ServiceCategory(
-      id: 'electric',
-      nameTk: 'Elektrik',
-      nameRu: 'Электрика',
-      isActive: true,
-    );
+    const category = ServiceCategory(id: 1, name: 'Elektrik', isActive: true);
     final now = DateTime(2026, 5, 7, 10);
 
     JobRequest jobWithStatus(JobStatus status) {

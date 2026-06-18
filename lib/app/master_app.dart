@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,6 +45,7 @@ class _MasterAppState extends State<MasterApp> {
   void dispose() {
     _appRouter.dispose();
     widget.locationTracker.dispose();
+    unawaited(widget.repositories.masterRealtimeCoordinator.dispose());
     widget.authCubit.close();
     widget.localeCubit.close();
     super.dispose();

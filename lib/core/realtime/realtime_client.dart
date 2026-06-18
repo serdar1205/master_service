@@ -9,7 +9,7 @@ import 'realtime_event.dart';
 abstract interface class RealtimeClient {
   Stream<RealtimeEvent> get events;
 
-  Future<void> connect({required String accessToken});
+  Future<void> connect({required String accessToken, int? masterId});
 
   Future<void> disconnect();
 }
@@ -27,7 +27,7 @@ class WebSocketRealtimeClient implements RealtimeClient {
   Stream<RealtimeEvent> get events => _eventsController.stream;
 
   @override
-  Future<void> connect({required String accessToken}) async {
+  Future<void> connect({required String accessToken, int? masterId}) async {
     await disconnect();
 
     final uri = Uri.parse(

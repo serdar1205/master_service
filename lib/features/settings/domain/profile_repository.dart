@@ -1,8 +1,10 @@
+import '../../categories/domain/service_category.dart';
+
 class ProfileData {
   const ProfileData({
     required this.fullName,
     required this.phone,
-    required this.skills,
+    required this.categories,
     required this.locationKey,
     required this.menuItemKeys,
     required this.balance,
@@ -11,7 +13,7 @@ class ProfileData {
 
   final String fullName;
   final String phone;
-  final List<String> skills;
+  final List<ServiceCategory> categories;
   final String locationKey;
   final List<String> menuItemKeys;
   final num balance;
@@ -20,7 +22,7 @@ class ProfileData {
   ProfileData copyWith({
     String? fullName,
     String? phone,
-    List<String>? skills,
+    List<ServiceCategory>? categories,
     String? locationKey,
     List<String>? menuItemKeys,
     num? balance,
@@ -29,7 +31,7 @@ class ProfileData {
     return ProfileData(
       fullName: fullName ?? this.fullName,
       phone: phone ?? this.phone,
-      skills: skills ?? this.skills,
+      categories: categories ?? this.categories,
       locationKey: locationKey ?? this.locationKey,
       menuItemKeys: menuItemKeys ?? this.menuItemKeys,
       balance: balance ?? this.balance,

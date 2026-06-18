@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:master_service/core/network/api_exception.dart';
 import 'package:master_service/core/utils/app_status.dart';
+import 'package:master_service/features/categories/domain/service_category.dart';
 import 'package:master_service/features/settings/application/profile_cubit.dart';
 import 'package:master_service/features/settings/domain/profile_repository.dart';
 
@@ -30,7 +31,7 @@ void main() {
         const ProfileData(
           fullName: 'Merdan',
           phone: '+99361000000',
-          skills: ['Plumbing'],
+          categories: [ServiceCategory(id: 1, name: 'Plumbing')],
           locationKey: 'Ashgabat',
           menuItemKeys: ['settings', 'paymentHistory', 'support'],
           balance: 0,
@@ -52,7 +53,7 @@ void main() {
       const ProfileData(
         fullName: 'Merdan',
         phone: '+99361000000',
-        skills: ['Plumbing'],
+        categories: [ServiceCategory(id: 1, name: 'Plumbing')],
         locationKey: 'Ashgabat',
         menuItemKeys: ['settings', 'paymentHistory', 'support'],
         balance: 0,
@@ -74,7 +75,7 @@ void main() {
       const ProfileData(
         fullName: 'Merdan',
         phone: '+99361000000',
-        skills: ['Plumbing'],
+        categories: [ServiceCategory(id: 1, name: 'Plumbing')],
         locationKey: 'Ashgabat',
         menuItemKeys: ['settings', 'paymentHistory', 'support'],
         balance: 0,

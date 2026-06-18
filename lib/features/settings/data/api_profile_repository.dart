@@ -29,7 +29,7 @@ class ApiProfileRepository implements ProfileRepository {
       return ProfileData(
         fullName: master.name,
         phone: master.phone,
-        skills: master.categories.map((category) => category.name).toList(),
+        categories: master.categories,
         locationKey: master.city?.name ?? '',
         menuItemKeys: const ['settings', 'paymentHistory', 'support'],
         balance: master.balance,

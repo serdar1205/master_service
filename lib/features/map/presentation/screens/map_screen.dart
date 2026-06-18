@@ -9,6 +9,7 @@ import '../../../../core/config/app_config.dart';
 import '../../../../core/utils/app_status.dart';
 import '../../../../app/di/app_repositories.dart';
 import '../../../../app/widgets/app_map_tile_layer.dart';
+import '../../../../app/widgets/orders_refresh_listener.dart';
 import '../../application/map_cubit.dart';
 import '../../data/local_map_repository.dart';
 import '../widgets/map_location_markers.dart';
@@ -35,26 +36,29 @@ class MapScreen extends StatelessWidget {
             );
           }
 
-          return LocaleChangeListener(
-            onLocaleChanged: () => context.read<MapCubit>().load(),
-            child: Scaffold(
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  return AppRefreshIndicator(
-                    onRefresh: () => context.read<MapCubit>().load(),
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: constraints.maxHeight,
-                        width: constraints.maxWidth,
-                        child: _ServiceMap(
-                          localizations: localizations,
-                          onOrderTap: openOrderSheet,
+          return OrdersRefreshListener(
+            onRefreshRequested: () => context.read<MapCubit>().load(),
+            child: LocaleChangeListener(
+              onLocaleChanged: () => context.read<MapCubit>().load(),
+              child: Scaffold(
+                body: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return AppRefreshIndicator(
+                      onRefresh: () => context.read<MapCubit>().load(),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: constraints.maxHeight,
+                          width: constraints.maxWidth,
+                          child: _ServiceMap(
+                            localizations: localizations,
+                            onOrderTap: openOrderSheet,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           );

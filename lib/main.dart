@@ -60,12 +60,15 @@ Future<void> main() async {
         tokenStorage: repositories.tokenStorage,
         activeOrderHolder: repositories.activeOrderHolder,
       );
+      final masterRealtime = repositories.masterRealtimeCoordinator;
 
       authCubit.stream.listen((state) {
         if (state.isAuthenticated) {
           unawaited(locationTracker.start());
+          unawaited(masterRealtime.start());
         } else {
           locationTracker.stop();
+          masterRealtime.stop();
           repositories.activeOrderHolder.clear();
         }
       });

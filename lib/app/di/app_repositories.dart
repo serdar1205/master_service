@@ -2,7 +2,11 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/network/api_locale_holder.dart';
+import '../../core/realtime/master_realtime_coordinator.dart';
+import '../../core/realtime/pusher_reverb_realtime_client.dart';
 import '../../core/storage/secure_token_storage.dart';
+import '../../features/categories/data/api_categories_repository.dart';
+import '../../features/categories/domain/categories_repository.dart';
 import '../../features/auth/data/auth_repository_impl.dart';
 import '../../features/auth/domain/auth_repository.dart';
 import '../../features/jobs/application/orders_list_refresh_notifier.dart';
@@ -24,6 +28,8 @@ class AppRepositories {
     required this.locationRepository,
     required this.activeOrderHolder,
     required this.ordersListRefreshNotifier,
+    required this.categoriesRepository,
+    required this.masterRealtimeCoordinator,
   });
 
   factory AppRepositories.create() {
@@ -35,16 +41,23 @@ class AppRepositories {
     );
     final activeOrderHolder = ActiveOrderHolder();
     final ordersListRefreshNotifier = OrdersListRefreshNotifier();
+    final masterRealtimeCoordinator = MasterRealtimeCoordinator(
+      realtimeClient: PusherReverbRealtimeClient(),
+      tokenStorage: tokenStorage,
+      ordersListRefreshNotifier: ordersListRefreshNotifier,
+    );
 
     return AppRepositories(
       tokenStorage: tokenStorage,
       apiClient: apiClient,
       authRepository: AuthRepositoryImpl(apiClient, tokenStorage),
       profileRepository: ApiProfileRepository(apiClient),
+      categoriesRepository: ApiCategoriesRepository(apiClient),
       ordersRepository: ApiOrdersRepository(apiClient),
       locationRepository: ApiLocationRepository(apiClient),
       activeOrderHolder: activeOrderHolder,
       ordersListRefreshNotifier: ordersListRefreshNotifier,
+      masterRealtimeCoordinator: masterRealtimeCoordinator,
     );
   }
 
@@ -52,10 +65,12 @@ class AppRepositories {
   final ApiClient apiClient;
   final AuthRepository authRepository;
   final ProfileRepository profileRepository;
+  final CategoriesRepository categoriesRepository;
   final OrdersRepository ordersRepository;
   final LocationRepository locationRepository;
   final ActiveOrderHolder activeOrderHolder;
   final OrdersListRefreshNotifier ordersListRefreshNotifier;
+  final MasterRealtimeCoordinator masterRealtimeCoordinator;
 }
 
 class AppRepositoriesScope extends InheritedWidget {

@@ -13,6 +13,35 @@ class AppConfig {
     defaultValue: 'wss://realtime.example.com',
   );
 
+  /// Laravel Reverb / Pusher-compatible websocket settings.
+  static const reverbAppKey = String.fromEnvironment(
+    'REVERB_APP_KEY',
+    defaultValue: 'handymanreverbappkey',
+  );
+
+  static const reverbHost = String.fromEnvironment(
+    'REVERB_HOST',
+    defaultValue: '192.168.31.64',
+  );
+
+  static const reverbPort = int.fromEnvironment(
+    'REVERB_PORT',
+    defaultValue: 8081,
+  );
+
+  static const reverbUseTls = bool.fromEnvironment(
+    'REVERB_USE_TLS',
+    defaultValue: false,
+  );
+
+  static const reverbCluster = String.fromEnvironment(
+    'REVERB_CLUSTER',
+    defaultValue: 'mt1',
+  );
+
+  static String get reverbAuthEndpoint =>
+      '$apiBaseUrl/api/v1/broadcasting/auth';
+
   /// TileServer-GL raster tiles (OpenMapTiles basic-preview style).
   static const mapTilesUrlTemplate = String.fromEnvironment(
     'MAP_TILES_URL',

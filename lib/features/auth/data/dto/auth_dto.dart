@@ -1,3 +1,6 @@
+import '../../../categories/data/category_dto.dart';
+import '../../../categories/domain/service_category.dart';
+
 class VerifyOtpResponseDto {
   const VerifyOtpResponseDto({required this.token, required this.master});
 
@@ -37,9 +40,7 @@ class MasterDto {
       isActive: json['is_active'] as bool? ?? true,
       isAvailable: json['is_available'] as bool? ?? true,
       accessExpiresAt: json['access_expires_at'] as String?,
-      categories: categoriesJson
-          .map((item) => CategoryDto.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      categories: parseCategoryList(categoriesJson),
       city: json['city'] == null
           ? null
           : CityDto.fromJson(json['city'] as Map<String, dynamic>),
@@ -55,24 +56,10 @@ class MasterDto {
   final bool isActive;
   final bool isAvailable;
   final String? accessExpiresAt;
-  final List<CategoryDto> categories;
+  final List<ServiceCategory> categories;
   final CityDto? city;
   final String? paymentModel;
   final num? paymentValue;
-}
-
-class CategoryDto {
-  const CategoryDto({required this.id, required this.name});
-
-  factory CategoryDto.fromJson(Map<String, dynamic> json) {
-    return CategoryDto(
-      id: json['id'] as int,
-      name: json['name'] as String? ?? '',
-    );
-  }
-
-  final int id;
-  final String name;
 }
 
 class CityDto {

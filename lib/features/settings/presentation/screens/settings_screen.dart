@@ -13,6 +13,7 @@ import '../../../../core/utils/app_status.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../auth/application/auth_cubit.dart';
 import '../../../../app/di/app_repositories.dart';
+import '../../../categories/domain/service_category.dart';
 import '../widgets/profile_categories_section.dart';
 import '../../application/profile_cubit.dart';
 
@@ -94,7 +95,7 @@ class SettingsScreen extends StatelessWidget {
                                   _ProfileCard(
                                     localizations: localizations,
                                     fullName: profile.fullName,
-                                    skills: profile.skills,
+                                    categories: profile.categories,
                                     onEditTap: () =>
                                         context.push(AppRoutes.editProfile),
                                   ),
@@ -192,13 +193,13 @@ class _ProfileCard extends StatelessWidget {
   const _ProfileCard({
     required this.localizations,
     required this.fullName,
-    required this.skills,
+    required this.categories,
     required this.onEditTap,
   });
 
   final AppLocalizations localizations;
   final String fullName;
-  final List<String> skills;
+  final List<ServiceCategory> categories;
   final VoidCallback onEditTap;
 
   @override
@@ -284,7 +285,7 @@ class _ProfileCard extends StatelessWidget {
               const SizedBox(height: 14),
               ProfileCategoriesSection(
                 localizations: localizations,
-                categories: skills,
+                categories: categories,
               ),
             ],
           ),
