@@ -4,10 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../app/widgets/app_brand_logo.dart';
+import '../../../../app/widgets/app_brand_header.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
-import '../../../../app/widgets/locale_badge.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/utils/app_status.dart';
@@ -51,7 +50,12 @@ class SettingsScreen extends StatelessWidget {
                 body: SafeArea(
                   child: Column(
                     children: [
-                      _ProfileHeader(localizations: localizations),
+                      AppBrandHeader(
+                        title: localizations.text('appTitle'),
+                        brandColor: SettingsScreen._brandColor,
+                        horizontalPadding: 18,
+                        showShadow: false,
+                      ),
                       Expanded(
                         child: BlocBuilder<ProfileCubit, ProfileState>(
                           builder: (context, state) {
@@ -150,37 +154,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      decoration: const BoxDecoration(color: Colors.white),
-      child: Row(
-        children: [
-          const AppBrandLogo(height: 42),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              localizations.text('appTitle'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: SettingsScreen._brandColor,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const LocaleBadge(brandColor: SettingsScreen._brandColor),
-        ],
       ),
     );
   }

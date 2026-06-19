@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../app/widgets/locale_badge.dart';
+import '../../../../app/widgets/app_brand_header.dart';
 import '../../../../core/widgets/turkmen_phone_field.dart';
 import '../../application/auth_cubit.dart';
 
@@ -33,7 +33,11 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _AuthHeader(localizations: localizations, brandColor: brandColor),
+            AppBrandHeader(
+              title: localizations.text('appTitle'),
+              brandColor: brandColor,
+              horizontalPadding: 28,
+            ),
             Expanded(
               child: BlocBuilder<AuthCubit, AuthState>(
                 builder: (context, state) {
@@ -75,48 +79,6 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
 
   void _submit(BuildContext context) {
     context.read<AuthCubit>().requestOtp(_phoneController.text);
-  }
-}
-
-class _AuthHeader extends StatelessWidget {
-  const _AuthHeader({required this.localizations, required this.brandColor});
-
-  final AppLocalizations localizations;
-  final Color brandColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.handyman_outlined, color: brandColor, size: 30),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              localizations.text('appTitle'),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: brandColor,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.1,
-              ),
-            ),
-          ),
-          LocaleBadge(brandColor: brandColor),
-        ],
-      ),
-    );
   }
 }
 

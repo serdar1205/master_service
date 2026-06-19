@@ -6,11 +6,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../app/widgets/app_brand_logo.dart';
+import '../../../../app/widgets/app_brand_header.dart';
 import '../../../../app/widgets/app_empty_view.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
-import '../../../../app/widgets/locale_badge.dart';
 import '../../../../app/widgets/locale_change_listener.dart';
 import '../../../../app/widgets/orders_refresh_listener.dart';
 import '../../../../app/widgets/order_map_preview.dart';
@@ -75,7 +74,10 @@ class JobsScreen extends StatelessWidget {
                 body: SafeArea(
                   child: Column(
                     children: [
-                      _OrdersHeader(localizations: localizations),
+                      AppBrandHeader(
+                        title: localizations.text('appTitle'),
+                        brandColor: JobsScreen._brandColor,
+                      ),
                       Expanded(
                         child: BlocBuilder<JobsCubit, JobsState>(
                           builder: (context, state) {
@@ -278,46 +280,6 @@ class JobsScreen extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _OrdersHeader extends StatelessWidget {
-  const _OrdersHeader({required this.localizations});
-
-  final AppLocalizations localizations;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const AppBrandLogo(height: 42),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              localizations.text('appTitle'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: JobsScreen._brandColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const LocaleBadge(brandColor: JobsScreen._brandColor),
-        ],
       ),
     );
   }
