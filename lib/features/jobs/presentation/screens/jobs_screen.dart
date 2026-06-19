@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_brand_logo.dart';
 import '../../../../app/widgets/app_empty_view.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
@@ -304,11 +305,7 @@ class _OrdersHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.location_on_outlined,
-            color: JobsScreen._brandColor,
-            size: 22,
-          ),
+          const AppBrandLogo(height: 42),
           const SizedBox(width: 9),
           Expanded(
             child: Text(

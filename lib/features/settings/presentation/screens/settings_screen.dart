@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/app_brand_logo.dart';
 import '../../../../app/widgets/app_error_view.dart';
 import '../../../../app/widgets/app_refresh_indicator.dart';
 import '../../../../app/widgets/locale_badge.dart';
@@ -167,11 +168,7 @@ class _ProfileHeader extends StatelessWidget {
       decoration: const BoxDecoration(color: Colors.white),
       child: Row(
         children: [
-          const Icon(
-            Icons.location_on_outlined,
-            color: SettingsScreen._brandColor,
-            size: 24,
-          ),
+          const AppBrandLogo(height: 42),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
