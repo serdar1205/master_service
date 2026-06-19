@@ -57,6 +57,10 @@ android {
                 // when a dedicated release keystore is not configured yet.
                 signingConfig = signingConfigs.getByName("debug")
             }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
