@@ -217,6 +217,9 @@ class JobsScreen extends StatelessWidget {
                                         actionLabel: localizations.text(
                                           jobs[i].actionKey,
                                         ),
+                                        onTap: () => context.go(
+                                          AppRoutes.jobDetailsPath(jobs[i].id),
+                                        ),
                                         showSecondaryAction: !jobs[i].isHistory,
                                         secondaryIcon: i % 3 == 1
                                             ? Icons.chat_bubble_outline
@@ -425,6 +428,7 @@ class _OrderCard extends StatelessWidget {
     required this.clientInitial,
     required this.status,
     required this.actionLabel,
+    required this.onTap,
     required this.onPrimaryAction,
     required this.onSecondaryAction,
     this.latitude,
@@ -446,137 +450,150 @@ class _OrderCard extends StatelessWidget {
   final String actionLabel;
   final bool showSecondaryAction;
   final IconData secondaryIcon;
+  final VoidCallback onTap;
   final VoidCallback onPrimaryAction;
   final VoidCallback onSecondaryAction;
   final bool outlinedPrimary;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFDCE5E7)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          OrderMapPreview(
-            orderId: orderId,
-            latitude: latitude,
-            longitude: longitude,
-            clientInitial: clientInitial,
-            height: 108,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            topRight: orderMapPriceBadge(price),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFDCE5E7)),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    _CategoryPill(label: category),
-                    const Spacer(),
-                    _StatusPill(label: status),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: const Color(0xFF11191C),
-                    fontWeight: FontWeight.w700,
-                    height: 1.12,
+                OrderMapPreview(
+                  orderId: orderId,
+                  latitude: latitude,
+                  longitude: longitude,
+                  clientInitial: clientInitial,
+                  height: 108,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
                   ),
+                  topRight: orderMapPriceBadge(price),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.navigation_outlined,
-                      color: Color(0xFF536167),
-                      size: 16,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        address,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF536167),
-                          fontWeight: FontWeight.w500,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          _CategoryPill(label: category),
+                          const Spacer(),
+                          _StatusPill(label: status),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: const Color(0xFF11191C),
+                          fontWeight: FontWeight.w700,
+                          height: 1.12,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: outlinedPrimary
-                          ? OutlinedButton(
-                              onPressed: onPrimaryAction,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: JobsScreen._brandColor,
-                                side: const BorderSide(
-                                  color: JobsScreen._brandColor,
-                                ),
-                                minimumSize: const Size(0, 43),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                              child: Text(
-                                actionLabel,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            )
-                          : FilledButton(
-                              onPressed: onPrimaryAction,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: JobsScreen._buttonColor,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(0, 43),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                              child: Text(
-                                actionLabel,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.navigation_outlined,
+                            color: Color(0xFF536167),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              address,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: const Color(0xFF536167),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
-                    ),
-                    if (showSecondaryAction) ...[
-                      const SizedBox(width: 12),
-                      IconButton(
-                        onPressed: onSecondaryAction,
-                        color: JobsScreen._brandColor,
-                        icon: Icon(secondaryIcon),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: outlinedPrimary
+                                ? OutlinedButton(
+                                    onPressed: onPrimaryAction,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: JobsScreen._brandColor,
+                                      side: const BorderSide(
+                                        color: JobsScreen._brandColor,
+                                      ),
+                                      minimumSize: const Size(0, 43),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      actionLabel,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  )
+                                : FilledButton(
+                                    onPressed: onPrimaryAction,
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: JobsScreen._buttonColor,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: const Size(0, 43),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      actionLabel,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                          if (showSecondaryAction) ...[
+                            const SizedBox(width: 12),
+                            IconButton(
+                              onPressed: onSecondaryAction,
+                              color: JobsScreen._brandColor,
+                              icon: Icon(secondaryIcon),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

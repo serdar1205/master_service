@@ -544,121 +544,128 @@ class _CurrentJobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.go(AppRoutes.jobDetailsPath(job.id)),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFD7E0E3)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 10,
-            offset: Offset(0, 3),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFD7E0E3)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A000000),
+                blurRadius: 10,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          OrderMapPreview(
-            orderId: job.id,
-            latitude: job.latitude,
-            longitude: job.longitude,
-            clientInitial: clientInitialFromName(job.clientName ?? ''),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              OrderMapPreview(
+                orderId: job.id,
+                latitude: job.latitude,
+                longitude: job.longitude,
+                clientInitial: clientInitialFromName(job.clientName ?? ''),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _CategoryPill(label: job.category),
-                          const SizedBox(height: 8),
-                          Text(
-                            job.title,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  color: const Color(0xFF11191C),
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.18,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          job.priceText,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                color: MasterHomeScreen._brandColor,
-                                fontWeight: FontWeight.w700,
-                                height: 1.1,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _CategoryPill(label: job.category),
+                              const SizedBox(height: 8),
+                              Text(
+                                job.title,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: const Color(0xFF11191C),
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.18,
+                                    ),
                               ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          localizations.text('notCash'),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: const Color(0xFF4B5960),
-                                fontWeight: FontWeight.w700,
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              job.priceText,
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: MasterHomeScreen._brandColor,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.1,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              localizations.text('notCash'),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: const Color(0xFF4B5960),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _LocationCard(address: job.address),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () =>
+                                context.go(AppRoutes.jobDetailsPath(job.id)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: MasterHomeScreen._buttonColor,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(0, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(11),
                               ),
+                              textStyle: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            child: Text(localizations.text(job.actionKey)),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        OutlinedButton(
+                          onPressed: () => callClientForJob(context, job),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: MasterHomeScreen._brandColor,
+                            minimumSize: const Size(58, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            side: const BorderSide(color: Color(0xFFD7E0E3)),
+                          ),
+                          child: const Icon(Icons.phone_outlined),
                         ),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                _LocationCard(address: job.address),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            context.go(AppRoutes.jobDetailsPath(job.id)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: MasterHomeScreen._buttonColor,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(0, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(11),
-                          ),
-                          textStyle: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        child: Text(localizations.text(job.actionKey)),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    OutlinedButton(
-                      onPressed: () => callClientForJob(context, job),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: MasterHomeScreen._brandColor,
-                        minimumSize: const Size(58, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        side: const BorderSide(color: Color(0xFFD7E0E3)),
-                      ),
-                      child: const Icon(Icons.phone_outlined),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -768,122 +775,133 @@ class _NewOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.go(AppRoutes.jobDetailsPath(job.id)),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFD7E0E3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          OrderMapPreview(
-            orderId: job.id,
-            latitude: job.latitude,
-            longitude: job.longitude,
-            clientInitial: clientInitialFromName(job.clientName ?? ''),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFD7E0E3)),
+            ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 23,
-                      backgroundColor: Color(0xFFE6FBF8),
-                      child: Icon(
-                        Icons.bolt,
-                        color: MasterHomeScreen._brandColor,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                OrderMapPreview(
+                  orderId: job.id,
+                  latitude: job.latitude,
+                  longitude: job.longitude,
+                  clientInitial: clientInitialFromName(job.clientName ?? ''),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(14),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          Text(
-                            job.title,
-                            style: const TextStyle(
-                              color: Color(0xFF101719),
-                              fontWeight: FontWeight.w700,
+                          const CircleAvatar(
+                            radius: 23,
+                            backgroundColor: Color(0xFFE6FBF8),
+                            child: Icon(
+                              Icons.bolt,
+                              color: MasterHomeScreen._brandColor,
+                              size: 28,
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            '${job.category} • ${job.address}',
-                            style: const TextStyle(
-                              color: Color(0xFF536167),
-                              fontSize: 12,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  job.title,
+                                  style: const TextStyle(
+                                    color: Color(0xFF101719),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  '${job.category} • ${job.address}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF536167),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F3F4),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              localizations.text('newOrder'),
+                              style: const TextStyle(
+                                color: Color(0xFF101719),
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
+                      const SizedBox(height: 14),
+                      const Divider(color: Color(0xFFE2E8EA), height: 1),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              job.priceText,
+                              style: const TextStyle(
+                                color: MasterHomeScreen._brandColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          FilledButton(
+                            onPressed: () =>
+                                context.go(AppRoutes.jobDetailsPath(job.id)),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF63D5DA),
+                              foregroundColor: const Color(0xFF083237),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(9),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 10,
+                              ),
+                            ),
+                            child: Text(
+                              localizations.text(job.actionKey),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F3F4),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        localizations.text('newOrder'),
-                        style: const TextStyle(
-                          color: Color(0xFF101719),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                const Divider(color: Color(0xFFE2E8EA), height: 1),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        job.priceText,
-                        style: const TextStyle(
-                          color: MasterHomeScreen._brandColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    FilledButton(
-                      onPressed: () =>
-                          context.go(AppRoutes.jobDetailsPath(job.id)),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF63D5DA),
-                        foregroundColor: const Color(0xFF083237),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 10,
-                        ),
-                      ),
-                      child: Text(
-                        localizations.text(job.actionKey),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
