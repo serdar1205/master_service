@@ -70,7 +70,7 @@ class _MyTasksSectionState extends State<MyTasksSection> {
               widget.localizations.text('myTasks'),
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             if (tasks.isEmpty)
@@ -195,7 +195,7 @@ class _AddTaskButton extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   localizations.text('addTask'),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,
                   ),
@@ -246,7 +246,7 @@ class _TasksSkeletonState extends State<_TasksSkeleton>
           widget.localizations.text('myTasks'),
           style: Theme.of(
             context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 12),
         AnimatedBuilder(

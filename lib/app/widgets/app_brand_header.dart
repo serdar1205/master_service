@@ -48,10 +48,9 @@ class AppBrandHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: brandColor,
                 fontWeight: FontWeight.w800,
-                fontSize: 22,
                 letterSpacing: 0.1,
               ),
             ),

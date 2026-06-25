@@ -51,7 +51,7 @@ class OrderDetailsInfoCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               details.description,
-              style: theme.bodyLarge?.copyWith(
+              style: theme.titleLarge?.copyWith(
                 color: const Color(0xFF11191C),
                 fontWeight: FontWeight.w700,
                 height: 1.3,
@@ -105,7 +105,7 @@ class OrderDetailsInfoCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     localizations.text('finalPrice'),
-                    style: theme.labelLarge?.copyWith(
+                    style: theme.titleSmall?.copyWith(
                       color: const Color(0xFF4290A3),
                       fontWeight: FontWeight.w700,
                     ),
@@ -113,7 +113,7 @@ class OrderDetailsInfoCard extends StatelessWidget {
                   const Spacer(),
                   Text(
                     details.finalPriceText!,
-                    style: theme.titleMedium?.copyWith(
+                    style: theme.titleLarge?.copyWith(
                       color: _brandColor,
                       fontWeight: FontWeight.w700,
                     ),
@@ -170,7 +170,7 @@ class _TimelineSection extends StatelessWidget {
       children: [
         Text(
           localizations.text('orderTimeline'),
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: const Color(0xFF526168),
             fontWeight: FontWeight.w800,
           ),
@@ -196,19 +196,21 @@ class _TimelineRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.schedule_outlined, size: 16, color: Color(0xFF6D7A82)),
+        const Icon(Icons.schedule_outlined, size: 18, color: Color(0xFF6D7A82)),
         const SizedBox(width: 8),
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: const Color(0xFF526168),
                 height: 1.35,
               ),
               children: [
                 TextSpan(
                   text: '$label: ',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 TextSpan(text: value),
               ],
@@ -238,7 +240,7 @@ class _InfoRow extends StatelessWidget {
     final content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF6D7A82)),
+        Icon(icon, size: 20, color: const Color(0xFF6D7A82)),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -246,7 +248,7 @@ class _InfoRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: const Color(0xFF8A969C),
                   fontWeight: FontWeight.w700,
                 ),
@@ -254,7 +256,7 @@ class _InfoRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: onTap == null
                       ? const Color(0xFF293237)
                       : AppColors.brand,
@@ -267,7 +269,7 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
         if (onTap != null)
-          const Icon(Icons.call_outlined, size: 18, color: AppColors.brand),
+          const Icon(Icons.call_outlined, size: 20, color: AppColors.brand),
       ],
     );
 
@@ -302,7 +304,7 @@ class _CategoryPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: const Color(0xFF4290A3),
             fontWeight: FontWeight.w800,
           ),
@@ -328,7 +330,7 @@ class _StatusPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: const Color(0xFF426A63),
             fontWeight: FontWeight.w800,
             height: 1.05,

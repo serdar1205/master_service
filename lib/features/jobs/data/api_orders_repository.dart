@@ -148,12 +148,14 @@ class ApiOrdersRepository implements OrdersRepository {
   @override
   Future<JobDetailsData> completeOrder({
     required String orderId,
-    required num finalPrice,
+    num? finalPrice,
   }) async {
     try {
       final response = await _apiClient.dio.post<Map<String, dynamic>>(
         '/api/v1/master/orders/$orderId/complete',
-        data: {'final_price': finalPrice},
+        data: finalPrice == null
+            ? <String, dynamic>{}
+            : {'final_price': finalPrice},
       );
       return _parseOrderResponse(response.data);
     } on DioException catch (error) {

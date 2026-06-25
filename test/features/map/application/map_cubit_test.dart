@@ -54,7 +54,7 @@ class _FakeOrdersRepository implements OrdersRepository {
   @override
   Future<JobDetailsData> completeOrder({
     required String orderId,
-    required num finalPrice,
+    num? finalPrice,
   }) {
     throw UnimplementedError();
   }

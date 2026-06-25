@@ -377,7 +377,7 @@ class JobDetailsCubit extends Cubit<JobDetailsState> {
 
   Future<bool> submitPhotos(String type) => _submitPhotos(type);
 
-  Future<bool> completeOrder(num finalPrice) async {
+  Future<bool> completeOrder() async {
     final data = state.data;
     if (data == null) {
       return false;
@@ -387,7 +387,7 @@ class JobDetailsCubit extends Cubit<JobDetailsState> {
     try {
       final updated = await _repository.completeOrder(
         orderId: data.id,
-        finalPrice: finalPrice,
+        finalPrice: data.finalPrice,
       );
       emit(
         state.copyWith(

@@ -28,6 +28,6 @@ abstract interface class OrdersRepository {
 
   Future<JobDetailsData> completeOrder({
     required String orderId,
-    required num finalPrice,
+    num? finalPrice,
   });
 }

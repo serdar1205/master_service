@@ -822,10 +822,11 @@ class _NewOrderCard extends StatelessWidget {
                               children: [
                                 Text(
                                   job.title,
-                                  style: const TextStyle(
-                                    color: Color(0xFF101719),
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        color: const Color(0xFF101719),
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
@@ -849,10 +850,11 @@ class _NewOrderCard extends StatelessWidget {
                             ),
                             child: Text(
                               localizations.text('newOrder'),
-                              style: const TextStyle(
-                                color: Color(0xFF101719),
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: const Color(0xFF101719),
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
                           ),
                         ],
@@ -865,10 +867,11 @@ class _NewOrderCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               job.priceText,
-                              style: const TextStyle(
-                                color: MasterHomeScreen._brandColor,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: MasterHomeScreen._brandColor,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
                           ),
                           FilledButton(

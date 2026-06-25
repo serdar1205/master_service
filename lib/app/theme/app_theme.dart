@@ -27,7 +27,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
-        titleTextStyle: textTheme.titleMedium?.copyWith(
+        titleTextStyle: textTheme.titleLarge?.copyWith(
           color: colorScheme.onSurface,
           fontWeight: FontWeight.w600,
         ),
@@ -85,7 +85,7 @@ class AppTheme {
         ),
       ),
       listTileTheme: ListTileThemeData(
-        titleTextStyle: textTheme.titleSmall,
+        titleTextStyle: textTheme.titleMedium,
         subtitleTextStyle: textTheme.bodySmall?.copyWith(
           color: const Color(0xFF6D7A82),
         ),
@@ -99,7 +99,7 @@ class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        titleTextStyle: textTheme.titleMedium?.copyWith(
+        titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w600,
         ),
         contentTextStyle: textTheme.bodyMedium,

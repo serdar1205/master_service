@@ -45,7 +45,7 @@ class TaskCard extends StatelessWidget {
         children: [
           Text(
             task.title,
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -53,7 +53,7 @@ class TaskCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               task.description,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 height: 1.35,
               ),

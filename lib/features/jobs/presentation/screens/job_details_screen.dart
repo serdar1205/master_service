@@ -146,11 +146,7 @@ class _JobDetailsContentState extends State<_JobDetailsContent> {
                           FilledButton.icon(
                             onPressed: state.isSubmitting
                                 ? null
-                                : () => _completeOrder(
-                                    context,
-                                    localizations,
-                                    details,
-                                  ),
+                                : () => _completeOrder(context),
                             style: FilledButton.styleFrom(
                               backgroundColor: _buttonColor,
                               foregroundColor: Colors.white,
@@ -177,50 +173,9 @@ class _JobDetailsContentState extends State<_JobDetailsContent> {
     );
   }
 
-  Future<void> _completeOrder(
-    BuildContext context,
-    AppLocalizations localizations,
-    JobDetailsData details,
-  ) async {
-    final priceController = TextEditingController(
-      text: details.finalPrice?.toString() ?? '',
-    );
-    final price = await showDialog<num>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(localizations.text('priceConfirmation')),
-          content: TextField(
-            controller: priceController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Final price (TMT)'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final value = num.tryParse(priceController.text.trim());
-                if (value == null) {
-                  return;
-                }
-                Navigator.of(dialogContext).pop(value);
-              },
-              child: Text(localizations.text('complete')),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (price == null || !context.mounted) {
-      return;
-    }
-
+  Future<void> _completeOrder(BuildContext context) async {
     final cubit = context.read<JobDetailsCubit>();
-    final completed = await cubit.completeOrder(price);
+    final completed = await cubit.completeOrder();
     if (!context.mounted) {
       return;
     }
@@ -249,7 +204,7 @@ class _DetailsHeader extends StatelessWidget {
             : localizations.text('orderNumber').replaceAll('{id}', orderId);
 
         return Container(
-          height: 50,
+          height: 56,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -277,7 +232,7 @@ class _DetailsHeader extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: _brandColor,
                     fontWeight: FontWeight.w700,
                   ),
@@ -390,7 +345,7 @@ class _PriceConfirmationCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             localizations.text('priceConfirmation'),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: _brandColor,
               fontWeight: FontWeight.w700,
             ),
@@ -399,7 +354,7 @@ class _PriceConfirmationCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               details.finalPriceText!,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: _brandColor,
                 fontWeight: FontWeight.w700,
               ),
@@ -409,7 +364,7 @@ class _PriceConfirmationCard extends StatelessWidget {
           Text(
             localizations.text('priceConfirmationDescription'),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: const Color(0xFF293237),
               height: 1.42,
               fontWeight: FontWeight.w500,
@@ -432,7 +387,7 @@ class _PriceConfirmationCard extends StatelessWidget {
               ),
               textStyle: Theme.of(
                 context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             icon: const Icon(Icons.phone_outlined),
             label: Text(localizations.text('callOperator')),
@@ -453,7 +408,7 @@ class _CompletionNote extends StatelessWidget {
     return Text(
       localizations.text('completionNote'),
       textAlign: TextAlign.center,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
         color: const Color(0xFF7A868C),
         height: 1.55,
         fontStyle: FontStyle.italic,

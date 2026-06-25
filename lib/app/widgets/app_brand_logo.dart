@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppBrandLogo extends StatelessWidget {
   const AppBrandLogo({super.key, this.height = 24});
 
-  static const assetPath = 'assets/image/handylogo.jpeg';
+  static const assetPath = 'assets/image/handylogo.png';
 
   final double height;
 
