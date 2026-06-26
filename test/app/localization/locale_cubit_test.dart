@@ -57,4 +57,28 @@ void main() {
 
     await cubit.close();
   });
+
+  test('toggleLocale switches between tk and ru', () async {
+    final storage = _FakeLocaleStorage();
+    final apiHolder = ApiLocaleHolder(initialLocaleCode: 'ru');
+    final cubit = LocaleCubit(
+      storage: storage,
+      apiLocaleHolder: apiHolder,
+      initialLocale: const Locale('ru'),
+    );
+
+    await cubit.toggleLocale();
+
+    expect(cubit.state.locale.languageCode, 'tk');
+    expect(storage.savedCode, 'tk');
+    expect(apiHolder.localeCode, 'tk');
+
+    await cubit.toggleLocale();
+
+    expect(cubit.state.locale.languageCode, 'ru');
+    expect(storage.savedCode, 'ru');
+    expect(apiHolder.localeCode, 'ru');
+
+    await cubit.close();
+  });
 }

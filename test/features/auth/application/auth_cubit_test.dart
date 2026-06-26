@@ -57,7 +57,7 @@ class _FakeAuthRepository implements AuthRepository {
 void main() {
   test('restoreSession moves to unauthenticated without session', () async {
     final cubit = AuthCubit(_FakeAuthRepository());
-    await cubit.restoreSession();
+    await cubit.restoreSession(minSplashDuration: Duration.zero);
 
     expect(cubit.state.status, AuthStatus.unauthenticated);
   });

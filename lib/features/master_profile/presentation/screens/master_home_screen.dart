@@ -392,7 +392,7 @@ class _StatsRow extends StatelessWidget {
           foregroundColor: const Color(0xFF3B629B),
           borderColor: const Color(0xFF9DBAEA),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
@@ -405,7 +405,7 @@ class _StatsRow extends StatelessWidget {
                 borderColor: MasterHomeScreen._brandColor,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: _StatCard(
                 value: completedCount,
@@ -443,16 +443,16 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 88),
-      padding: const EdgeInsets.all(10),
+      constraints: const BoxConstraints(minHeight: 68),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: borderColor),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0A000000),
-            blurRadius: 8,
+            blurRadius: 6,
             offset: Offset(0, 2),
           ),
         ],
@@ -460,22 +460,23 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: foregroundColor.withValues(alpha: 0.9), size: 22),
-          const SizedBox(height: 10),
+          Icon(icon, color: foregroundColor.withValues(alpha: 0.9), size: 18),
+          const SizedBox(height: 6),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: foregroundColor,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: foregroundColor.withValues(alpha: 0.85),
               fontWeight: FontWeight.w800,
-              letterSpacing: 0.6,
+              fontSize: 10,
+              letterSpacing: 0.4,
             ),
           ),
         ],

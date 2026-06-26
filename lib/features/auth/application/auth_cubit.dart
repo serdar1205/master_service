@@ -58,31 +58,40 @@ class AuthState {
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit(this._authRepository) : super(const AuthState.initial());
 
+  static const splashDuration = Duration(seconds: 5);
+
   final AuthRepository _authRepository;
 
-  Future<void> restoreSession() async {
+  Future<void> restoreSession({
+    Duration minSplashDuration = splashDuration,
+  }) async {
     emit(state.copyWith(status: AuthStatus.restoring, clearError: true));
 
+    AuthState? resolvedState;
+    await Future.wait([
+      Future<void>.delayed(minSplashDuration),
+      _resolveRestoredSession().then((state) => resolvedState = state),
+    ]);
+
+    emit(resolvedState!);
+  }
+
+  Future<AuthState> _resolveRestoredSession() async {
     try {
       final session = await _authRepository.restoreSession();
       if (session == null) {
-        emit(const AuthState(status: AuthStatus.unauthenticated));
-        return;
+        return const AuthState(status: AuthStatus.unauthenticated);
       }
 
-      emit(
-        AuthState(
-          status: AuthStatus.authenticated,
-          profileComplete: session.profileComplete,
-          categoriesComplete: session.categoriesComplete,
-        ),
+      return AuthState(
+        status: AuthStatus.authenticated,
+        profileComplete: session.profileComplete,
+        categoriesComplete: session.categoriesComplete,
       );
     } on Object catch (error) {
-      emit(
-        AuthState(
-          status: AuthStatus.failure,
-          errorMessage: _friendlyAuthError(error),
-        ),
+      return AuthState(
+        status: AuthStatus.failure,
+        errorMessage: _friendlyAuthError(error),
       );
     }
   }

@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const AppBrandLogo(height: 140),
+            const AppBrandLogo(height: 200),
             const SizedBox(height: 32),
             const CircularProgressIndicator(),
             const SizedBox(height: 16),

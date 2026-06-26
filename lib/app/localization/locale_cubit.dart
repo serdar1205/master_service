@@ -79,6 +79,14 @@ class LocaleCubit extends Cubit<LocaleState> {
     emit(LocaleState(locale: locale, status: AppStatus.success));
   }
 
+  Future<void> toggleLocale() async {
+    final nextCode =
+        state.locale.languageCode == AppConstants.fallbackLocaleCode
+        ? AppConstants.defaultLocaleCode
+        : AppConstants.fallbackLocaleCode;
+    await setLocale(nextCode);
+  }
+
   void _syncApiLocale(Locale locale) {
     _apiLocaleHolder.setLocaleCode(locale.languageCode);
   }

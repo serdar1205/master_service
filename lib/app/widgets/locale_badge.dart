@@ -15,17 +15,24 @@ class LocaleBadge extends StatelessWidget {
       builder: (context, state) {
         final label = state.locale.languageCode == 'ru' ? 'RU' : 'TM';
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F8F9),
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
             borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: brandColor,
-              fontWeight: FontWeight.w700,
+            onTap: () => context.read<LocaleCubit>().toggleLocale(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F8F9),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: brandColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         );

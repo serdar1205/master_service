@@ -460,7 +460,7 @@ class _SettingsTile extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
           color: const Color(0xFF242B2F),
           fontWeight: FontWeight.w500,
         ),
@@ -516,9 +516,9 @@ class _SignOutButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         textStyle: Theme.of(
           context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
       ),
-      icon: const Icon(Icons.logout, size: 22),
+      icon: const Icon(Icons.logout, size: 20),
       label: Text(localizations.text('signOut')),
     );
   }

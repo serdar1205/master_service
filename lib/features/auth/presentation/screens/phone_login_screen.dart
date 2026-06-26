@@ -16,6 +16,7 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final _phoneController = TextEditingController();
+  bool _termsAccepted = false;
 
   @override
   void dispose() {
@@ -49,22 +50,16 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                         state: state,
                         phoneController: _phoneController,
                         brandColor: brandColor,
+                        termsAccepted: _termsAccepted,
+                        onTermsChanged: (accepted) {
+                          setState(() => _termsAccepted = accepted);
+                        },
                         onSubmit: () => _submit(context),
                       ),
                       const SizedBox(height: 20),
                       _TrustBadges(
                         localizations: localizations,
                         brandColor: brandColor,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        localizations.text('copyright'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF69767A),
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                        ),
                       ),
                     ],
                   );
@@ -78,6 +73,10 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   }
 
   void _submit(BuildContext context) {
+    if (!_termsAccepted) {
+      return;
+    }
+
     context.read<AuthCubit>().requestOtp(_phoneController.text);
   }
 }
@@ -88,6 +87,8 @@ class _LoginCard extends StatelessWidget {
     required this.state,
     required this.phoneController,
     required this.brandColor,
+    required this.termsAccepted,
+    required this.onTermsChanged,
     required this.onSubmit,
   });
 
@@ -95,7 +96,11 @@ class _LoginCard extends StatelessWidget {
   final AuthState state;
   final TextEditingController phoneController;
   final Color brandColor;
+  final bool termsAccepted;
+  final ValueChanged<bool> onTermsChanged;
   final VoidCallback onSubmit;
+
+  bool get _canContinue => termsAccepted && !state.isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +148,11 @@ class _LoginCard extends StatelessWidget {
             TurkmenPhoneField(
               controller: phoneController,
               focusedBorderColor: brandColor,
-              onSubmitted: (_) => onSubmit(),
+              onSubmitted: (_) {
+                if (_canContinue) {
+                  onSubmit();
+                }
+              },
             ),
             if (state.errorMessage != null) ...[
               const SizedBox(height: 12),
@@ -153,8 +162,15 @@ class _LoginCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 18),
+            _TermsAcceptanceRow(
+              localizations: localizations,
+              brandColor: brandColor,
+              termsAccepted: termsAccepted,
+              onTermsChanged: onTermsChanged,
+            ),
+            const SizedBox(height: 18),
             ElevatedButton(
-              onPressed: state.isLoading ? null : onSubmit,
+              onPressed: _canContinue ? onSubmit : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.buttonTeal,
                 foregroundColor: Colors.white,
@@ -191,7 +207,58 @@ class _LoginCard extends StatelessWidget {
             const SizedBox(height: 36),
             const Divider(color: Color(0xFFE1E7E9), height: 1),
             const SizedBox(height: 26),
-            Text.rich(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                _RoundInfoIcon(icon: Icons.shield_outlined),
+                SizedBox(width: 20),
+                _RoundInfoIcon(icon: Icons.help_outline),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TermsAcceptanceRow extends StatelessWidget {
+  const _TermsAcceptanceRow({
+    required this.localizations,
+    required this.brandColor,
+    required this.termsAccepted,
+    required this.onTermsChanged,
+  });
+
+  final AppLocalizations localizations;
+  final Color brandColor;
+  final bool termsAccepted;
+  final ValueChanged<bool> onTermsChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 24,
+          width: 24,
+          child: Checkbox(
+            value: termsAccepted,
+            onChanged: (value) => onTermsChanged(value ?? false),
+            activeColor: brandColor,
+            side: const BorderSide(color: Color(0xFFB8C4C8), width: 1.5),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => onTermsChanged(!termsAccepted),
+            child: Text.rich(
               TextSpan(
                 text: '${localizations.text('termsNotice')} ',
                 children: [
@@ -211,18 +278,9 @@ class _LoginCard extends StatelessWidget {
                 height: 1.35,
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                _RoundInfoIcon(icon: Icons.shield_outlined),
-                SizedBox(width: 20),
-                _RoundInfoIcon(icon: Icons.help_outline),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -297,7 +355,7 @@ class _TrustBadge extends StatelessWidget {
     final lines = text.split('\n');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -315,14 +373,14 @@ class _TrustBadge extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               color: iconBackgroundColor,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Icon(icon, color: iconColor, size: 28),
+              padding: const EdgeInsets.all(8),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,20 +388,30 @@ class _TrustBadge extends StatelessWidget {
               children: [
                 Text(
                   lines.first,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: const Color(0xFF7D898E),
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
+                    fontSize: 9,
+                    letterSpacing: 0.4,
+                    height: 1.1,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  lines.length > 1 ? lines[1] : '',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: const Color(0xFF172025),
-                    fontWeight: FontWeight.w700,
+                if (lines.length > 1) ...[
+                  const SizedBox(height: 1),
+                  Text(
+                    lines[1],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: const Color(0xFF172025),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      height: 1.1,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
