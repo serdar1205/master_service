@@ -15,7 +15,9 @@ import '../../features/jobs/domain/orders_repository.dart';
 import '../../features/map/application/active_order_holder.dart';
 import '../../features/map/data/api_location_repository.dart';
 import '../../features/map/domain/location_repository.dart';
+import '../../features/settings/data/api_app_settings_repository.dart';
 import '../../features/settings/data/api_profile_repository.dart';
+import '../../features/settings/domain/app_settings_repository.dart';
 import '../../features/settings/domain/profile_repository.dart';
 
 class AppRepositories {
@@ -24,6 +26,7 @@ class AppRepositories {
     required this.apiClient,
     required this.authRepository,
     required this.profileRepository,
+    required this.appSettingsRepository,
     required this.ordersRepository,
     required this.locationRepository,
     required this.activeOrderHolder,
@@ -53,6 +56,7 @@ class AppRepositories {
       apiClient: apiClient,
       authRepository: AuthRepositoryImpl(apiClient, tokenStorage),
       profileRepository: ApiProfileRepository(apiClient),
+      appSettingsRepository: ApiAppSettingsRepository(apiClient),
       categoriesRepository: ApiCategoriesRepository(apiClient),
       ordersRepository: ApiOrdersRepository(apiClient),
       locationRepository: ApiLocationRepository(apiClient),
@@ -66,6 +70,7 @@ class AppRepositories {
   final ApiClient apiClient;
   final AuthRepository authRepository;
   final ProfileRepository profileRepository;
+  final AppSettingsRepository appSettingsRepository;
   final CategoriesRepository categoriesRepository;
   final OrdersRepository ordersRepository;
   final LocationRepository locationRepository;
@@ -86,6 +91,12 @@ class AppRepositoriesScope extends InheritedWidget {
   static AppRepositories of(BuildContext context) {
     final scope = context
         .dependOnInheritedWidgetOfExactType<AppRepositoriesScope>();
+    assert(scope != null, 'AppRepositoriesScope not found in widget tree.');
+    return scope!.repositories;
+  }
+
+  static AppRepositories read(BuildContext context) {
+    final scope = context.getInheritedWidgetOfExactType<AppRepositoriesScope>();
     assert(scope != null, 'AppRepositoriesScope not found in widget tree.');
     return scope!.repositories;
   }

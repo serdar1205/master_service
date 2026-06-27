@@ -52,6 +52,7 @@ dependencies:
   url_launcher: ^6.3.2
   pusher_channels_flutter: ^2.6.0
   flutter_svg: ^2.3.0
+  flutter_html: ^3.0.0
 
 dev_dependencies:
   flutter_test:

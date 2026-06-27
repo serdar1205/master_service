@@ -16,6 +16,7 @@ class AppRoutes {
   static const languageSettings = '/settings/language';
   static const paymentHistory = '/settings/payments';
   static const supportCenter = '/settings/support';
+  static const terms = '/terms';
 
   static String jobDetailsPath(String jobId) => '/jobs/$jobId';
 }

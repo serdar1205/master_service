@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/localization/app_localizations.dart';
+import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/app_brand_header.dart';
 import '../../../../core/widgets/turkmen_phone_field.dart';
@@ -54,6 +56,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                         onTermsChanged: (accepted) {
                           setState(() => _termsAccepted = accepted);
                         },
+                        onTermsLinkTap: () => context.push(AppRoutes.terms),
                         onSubmit: () => _submit(context),
                       ),
                       const SizedBox(height: 20),
@@ -89,6 +92,7 @@ class _LoginCard extends StatelessWidget {
     required this.brandColor,
     required this.termsAccepted,
     required this.onTermsChanged,
+    required this.onTermsLinkTap,
     required this.onSubmit,
   });
 
@@ -98,6 +102,7 @@ class _LoginCard extends StatelessWidget {
   final Color brandColor;
   final bool termsAccepted;
   final ValueChanged<bool> onTermsChanged;
+  final VoidCallback onTermsLinkTap;
   final VoidCallback onSubmit;
 
   bool get _canContinue => termsAccepted && !state.isLoading;
@@ -167,6 +172,7 @@ class _LoginCard extends StatelessWidget {
               brandColor: brandColor,
               termsAccepted: termsAccepted,
               onTermsChanged: onTermsChanged,
+              onTermsLinkTap: onTermsLinkTap,
             ),
             const SizedBox(height: 18),
             ElevatedButton(
@@ -228,16 +234,27 @@ class _TermsAcceptanceRow extends StatelessWidget {
     required this.brandColor,
     required this.termsAccepted,
     required this.onTermsChanged,
+    required this.onTermsLinkTap,
   });
 
   final AppLocalizations localizations;
   final Color brandColor;
   final bool termsAccepted;
   final ValueChanged<bool> onTermsChanged;
+  final VoidCallback onTermsLinkTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bodyStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: const Color(0xFF6B777C),
+      fontWeight: FontWeight.w600,
+      height: 1.35,
+    );
+    final linkStyle = bodyStyle?.copyWith(
+      color: brandColor,
+      fontWeight: FontWeight.w800,
+    );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,28 +273,28 @@ class _TermsAcceptanceRow extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: GestureDetector(
-            onTap: () => onTermsChanged(!termsAccepted),
-            child: Text.rich(
-              TextSpan(
-                text: '${localizations.text('termsNotice')} ',
-                children: [
-                  TextSpan(
-                    text: localizations.text('termsLink'),
-                    style: TextStyle(
-                      color: brandColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  TextSpan(text: ' ${localizations.text('termsAccept')}'),
-                ],
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => onTermsChanged(!termsAccepted),
+                child: Text(
+                  '${localizations.text('termsNotice')} ',
+                  style: bodyStyle,
+                ),
               ),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF6B777C),
-                fontWeight: FontWeight.w600,
-                height: 1.35,
+              GestureDetector(
+                onTap: onTermsLinkTap,
+                child: Text(localizations.text('termsLink'), style: linkStyle),
               ),
-            ),
+              GestureDetector(
+                onTap: () => onTermsChanged(!termsAccepted),
+                child: Text(
+                  ' ${localizations.text('termsAccept')}',
+                  style: bodyStyle,
+                ),
+              ),
+            ],
           ),
         ),
       ],

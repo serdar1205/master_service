@@ -16,14 +16,16 @@ import '../../features/settings/presentation/screens/edit_profile_screen.dart';
 import '../../features/settings/presentation/screens/language_settings_screen.dart';
 import '../../features/settings/presentation/screens/payment_history_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/screens/terms_screen.dart';
 import '../../features/settings/presentation/screens/support_screen.dart';
+import '../di/app_repositories.dart';
 import '../widgets/app_error_page.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
 import 'main_shell.dart';
 
 class AppRouter {
-  AppRouter(this._authCubit)
+  AppRouter(this._authCubit, this._repositories)
     : _refreshStream = GoRouterRefreshStream(_authCubit.stream) {
     router = GoRouter(
       initialLocation: AppRoutes.splash,
@@ -41,6 +43,11 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.otp,
           builder: (context, state) => const OtpVerificationScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.terms,
+          builder: (context, state) =>
+              TermsScreen(repository: _repositories.appSettingsRepository),
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
@@ -122,6 +129,7 @@ class AppRouter {
   }
 
   final AuthCubit _authCubit;
+  final AppRepositories _repositories;
   final GoRouterRefreshStream _refreshStream;
 
   late final GoRouter router;
@@ -132,7 +140,8 @@ class AppRouter {
     final isAuthRoute =
         location == AppRoutes.phoneLogin ||
         location == AppRoutes.otp ||
-        location == AppRoutes.splash;
+        location == AppRoutes.splash ||
+        location == AppRoutes.terms;
 
     if (authState.status == AuthStatus.initial ||
         authState.status == AuthStatus.restoring) {
@@ -140,11 +149,15 @@ class AppRouter {
     }
 
     if (authState.status == AuthStatus.otpRequested) {
-      return location == AppRoutes.otp ? null : AppRoutes.otp;
+      return location == AppRoutes.otp || location == AppRoutes.terms
+          ? null
+          : AppRoutes.otp;
     }
 
     if (!authState.isAuthenticated) {
-      return location == AppRoutes.phoneLogin ? null : AppRoutes.phoneLogin;
+      return location == AppRoutes.phoneLogin || location == AppRoutes.terms
+          ? null
+          : AppRoutes.phoneLogin;
     }
 
     if (isAuthRoute) {

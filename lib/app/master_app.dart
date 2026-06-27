@@ -38,7 +38,7 @@ class _MasterAppState extends State<MasterApp> {
   @override
   void initState() {
     super.initState();
-    _appRouter = AppRouter(widget.authCubit);
+    _appRouter = AppRouter(widget.authCubit, widget.repositories);
   }
 
   @override
